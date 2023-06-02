@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { analyze } from '../src/index.ts';
+import { regexParse } from '../src/regex/parser.ts';
 
 /**
  * @tags pdp add_to_cart
@@ -12,7 +12,7 @@ describe('Test suite', () => {
      */
     describe('Test example')
     `;
-    const analyzed = analyze(fileWithDocBlock);
+    const analyzed = regexParse(fileWithDocBlock);
     expect(analyzed).toHaveLength(1);
     expect(analyzed[0].tags).toHaveLength(1);
     expect(analyzed[0].tags[0].groups.itemName).toBe('tags');
@@ -34,7 +34,7 @@ describe('Test suite', () => {
     describe('Test example #2')
     `;
 
-    const analyzed = analyze(fileWithDocBlock);
+    const analyzed = regexParse(fileWithDocBlock);
     expect(analyzed).toHaveLength(2);
     expect(analyzed[0].tags).toHaveLength(2);
     expect(analyzed[0].tags[0].groups.itemName).toBe('tags');

@@ -5,9 +5,11 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
+    "app": "node ./build/index.js",
     "test": "jest --verbose",
     "compile": "tsc",
-    "compile:watch": "tsc -w"
+    "compile:watch": "tsc -w",
+    "build": "peggy -o src/peggy/parser.js -o build/peggy/parser.cjs src/peggy/rules.pegjs"
   },
   "author": "Iñaki Elizari Reta",
   "license": "ISC",
@@ -20,5 +22,8 @@
     "babel-jest": "^29.5.0",
     "jest": "^29.5.0",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "peggy": "^3.0.2"
   }
 }
