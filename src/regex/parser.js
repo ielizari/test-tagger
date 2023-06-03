@@ -4,14 +4,9 @@ const docblock = /^\s*\/\*\*\n(\s*\*\s@.*\n)*\s*\*\/\n\s*(describe|it|test)\s*\(
 const item = /^\s*\*\s@(?<itemName>[^\s]+) (?<itemValue>.+)\n*/gm;
 const functions = /(?<fnName>describe\(.*\))/gm;
 
-interface Analyzed {
-  block: RegExpExecArray,
-  tags: Array<RegExpExecArray>,
-}
-
-export function regexParse(code?: string): Array<Analyzed> {
+function regexParse(code) {
   if(!code) code = '';
-  let result: Array<Analyzed> = [];
+  let result = [];
   const blocks = findAllMatches(code, docblock);
 
   blocks.forEach((doc) => {
@@ -24,9 +19,9 @@ export function regexParse(code?: string): Array<Analyzed> {
   return result;
 }
 
-export function findAllMatches(text: string, pattern: RegExp): Array<RegExpExecArray> {
-  let matches: Array<RegExpExecArray> = [];
-  let match: RegExpExecArray | null;
+function findAllMatches(text, pattern) {
+  let matches = [];
+  let match;
   do {
     match = pattern.exec(text);
     if (match) {
@@ -35,4 +30,9 @@ export function findAllMatches(text: string, pattern: RegExp): Array<RegExpExecA
   } while(match)
 
   return matches;
+}
+
+module.exports = {
+  regexParse,
+  findAllMatches,
 }

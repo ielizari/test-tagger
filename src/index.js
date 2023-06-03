@@ -1,7 +1,5 @@
-import { regexParse } from './regex/parser'
-// import { parse as peggyParser } from './peggy/parser'
-const peggyParser = require('./peggy/parser')
-
+const regexParse = require('./regex/parser');
+const peggyParser = require('./peggy').parser;
 
 const fileWithDocBlock = `
     /**

@@ -3,25 +3,17 @@
   "version": "1.0.0",
   "description": "Utility for code tagging and reporting",
   "main": "src/index.ts",
-  "type": "module",
   "scripts": {
-    "app": "node ./build/index.js",
+    "app": "node src/index.js",
     "test": "jest --verbose",
-    "compile": "tsc",
-    "compile:watch": "tsc -w",
-    "build": "peggy -o src/peggy/parser.js -o build/peggy/parser.cjs src/peggy/rules.pegjs"
+    "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs"
   },
   "author": "Iñaki Elizari Reta",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.21.8",
-    "@babel/preset-env": "^7.21.5",
-    "@babel/preset-typescript": "^7.21.5",
     "@jest/globals": "^29.5.0",
     "@types/node": "^14.11.2",
-    "babel-jest": "^29.5.0",
-    "jest": "^29.5.0",
-    "typescript": "^5.0.4"
+    "jest": "^29.5.0"
   },
   "dependencies": {
     "peggy": "^3.0.2"
