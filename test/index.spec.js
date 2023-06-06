@@ -61,10 +61,9 @@ describe('PEGGY Test suite', () => {
     describe('Test example')
     `;
     const analyzed = peggyParser.parse(fileWithDocBlock);
-    console.log(analyzed);
   });
 
-  it.skip('Detects multiple docblocks', () => {
+  it('Detects multiple docblocks', () => {
     const fileWithDocBlock = `
     /**
      * @tags pdp add_to_cart
@@ -79,7 +78,8 @@ describe('PEGGY Test suite', () => {
     describe('Test example #2')
     `;
 
-    const analyzed = regexParse(fileWithDocBlock);
+    const analyzed = peggyParser.parse(fileWithDocBlock);
+    console.log(analyzed);
     expect(analyzed).toHaveLength(2);
     expect(analyzed[0].tags).toHaveLength(2);
     expect(analyzed[0].tags[0].groups.itemName).toBe('tags');
@@ -91,4 +91,16 @@ describe('PEGGY Test suite', () => {
     expect(analyzed[1].tags[1].groups.itemName).toBe('description');
     expect(analyzed[1].tags[1].groups.itemValue).toBe('Prueba2');
   });
+});
+
+describe.only('Javascript parser', () => {
+  it('Detects javascript functions', () => {
+    const input = `
+      function aleale(1, a) {
+        console.log('vamooos');
+      }
+    `;
+    const analyzed = peggyParser.parse(input);
+    console.log(analyzed);
+  })
 });
