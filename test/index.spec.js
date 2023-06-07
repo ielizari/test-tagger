@@ -96,9 +96,16 @@ describe('PEGGY Test suite', () => {
 describe.only('Javascript parser', () => {
   it('Detects javascript functions', () => {
     const input = `
+      aleale()
+      //asdasd
       function aleale(1, a) {
         console.log('vamooos');
+        function probando() {
+          console.log('esto es una prueba');
+        }
       }
+      aleale()
+      //asds
     `;
     const analyzed = peggyParser.parse(input);
     console.log(analyzed);

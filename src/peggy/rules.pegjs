@@ -1,9 +1,14 @@
-{
-	const blocks = [];
-}
 
-prueba = result:function* {
-	return result;
+{{
+	const functions = [
+		"describe",
+		"test",
+		"it",
+		"aleale"
+	];
+}}
+prueba = result:(function / functionCall / ignored_content)* {
+	return result.filter((match) => match.type !== 'ignored');
 }
 
 start = result:item* {
@@ -38,12 +43,26 @@ target_functions =
 	"test" /
 	"it"
 
+functionCall = _ (identifier"." _)? name:identifier _ args:functionArgs ";"? &{ return functions.includes(name) } {
+	return {
+    	type: 'function call',
+        name: name,
+        args: args
+    }
+}
+
 function =
-	_ "function" _ identifier _ functionArgs fn_content
+	_ "function" _ fname:(identifier) _ fargs:(functionArgs) fcontent:(fn_content) {
+		return {
+			type: 'function declaration',
+			name: fname,
+			args: fargs,
+		}
+	}
 
 
-functionArgs = _ "(" args:(!")" _ i:(variable) _ ","? { console.log('var', i); return i })* ")" { console.log('arrrgs', args); return args }
-fn_content = _ "{" content:(!"}" i:. { return i })* _ "}" _ { return content.join('') }
+functionArgs = _ "(" args:(!")" _ arg:($variable) _ ","? { return arg })* ")" _ { return args }
+fn_content = _ "{" content:(!"}" c:. { return c })* _ "}" _ { return content.join('') }
 
 variable =
 	identifier /
@@ -60,8 +79,9 @@ string =
 	"'" text:(!"\"" .)* "'" { return text.join('')} /
 	"`" text:(!"\"" .)* "`" { return text.join('')}
 
-identifier = [a-zA-Z_$][a-zA-Z_$0-9]*
+identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next }
 
+ignored_content = _ p:([^\n]+) _ {return { type: 'ignored', content: p.join('')}}
 _ = [ \t\r\n]* {return null}
 
 // start = result:item* {
