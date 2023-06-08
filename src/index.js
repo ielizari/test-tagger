@@ -29,5 +29,5 @@ const fileWithDocBlock = `
 
 //regexParse(fileWithDocBlock);
 const result = peggyParser.parse(fileWithDocBlock);
-console.log(result)
+console.dir(result, { depth: null });
 

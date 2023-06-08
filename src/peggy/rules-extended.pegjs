@@ -7,12 +7,12 @@
 		"aleale"
 	];
 }}
-prueba = result:(functionCall / ignored_content)* {
+prueba = result:(function / functionCall / ignored_content)* {
 	return result.filter((match) => match.type !== 'ignored');
 }
 
 start = result:item* {
-	log(blocks);
+	console.log(blocks);
 	//return result;
 	return result
 		.filter((block) => block[0] === 'DOCBLOCK')
@@ -43,13 +43,11 @@ target_functions =
 	"test" /
 	"it"
 
-functionCall = _ (identifier _ "." _)? name:identifier _ args:functionArgs _ ";"? _ &{ return functions.includes(name) } {
-	const nestedCalls = args.filter(arg => typeof arg === 'object' && arg.type === 'function call');
+functionCall = _ (identifier"." _)? name:identifier _ args:functionArgs ";"? &{ return functions.includes(name) } {
 	return {
     	type: 'function call',
-      name: name,
-      args: args,
-			nested: nestedCalls,
+        name: name,
+        args: args
     }
 }
 
@@ -68,24 +66,17 @@ standardFunction =
 arrowFunction =
 	_ "async"? _ fargs:(functionArgs) _ "=>" _ fcontent:(fn_content) {
 		return {
-			type: 'function call',
+			type: 'function declaration',
 			args: fargs,
       content: fcontent,
 		}
 	}
 
 
-functionArgs = _ "(" args:(!")" _ arg:( function / $fn_arg) _ ","? { return arg })* ")" _ { return args }
+functionArgs = _ "(" args:(!")" _ arg:($variable) _ ","? { return arg })* ")" _ { return args }
 fn_content = _ "{" content:(fn_inner)* _ "}" _ { return content }
 
-fn_inner = functionCall / i:(!"}" . ) { return i.join('') }
-
-fn_arg =
-	//functionCall /
-	//function /
-	string /
-	identifier _ "="_ variable /
-	identifier
+fn_inner = function / i:(!"}" . ) { return i.join('') }
 
 variableDeclaration = _ ("const" / "let" / "var") _ "=" _
 variable =
@@ -100,8 +91,8 @@ float = integer? "." [0-9]+
 integer = "-"? [0-9]+
 string =
 	"\"" text:(!"\"" .)* "\"" { return text.join('')} /
-	"'" text:(!"'" .)* "'" { return text.join('')} /
-	"`" text:(!"`" .)* "`" { return text.join('')}
+	"'" text:(!"\"" .)* "'" { return text.join('')} /
+	"`" text:(!"\"" .)* "`" { return text.join('')}
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next }
 
