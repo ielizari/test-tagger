@@ -20,8 +20,9 @@ testFnNames =
 	"test" /
 	"it"
 
-testModifiers = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / identifier) _ { return mod; }
+testModifiers = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / unknownModifier) _ { return mod; }
 eachModifier = "each" _ "(" _ a:Array? _ ")" { return { type: 'each', values: a }; }
+unknownModifier =  i:identifier { return { type: 'unknown', value: i }; }
 
 testDescription =
 	string /
