@@ -5,7 +5,6 @@ start = result:(testFnCall / ignored_content)* {
 
 testFnCall = tags:docblock? fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? {
 	const nested = testFn.filter((match) => match?.type !== 'ignored');
-	console.log(location());
 	return {
 		type: 'test',
     name: fnName,
