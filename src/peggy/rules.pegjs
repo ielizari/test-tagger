@@ -3,8 +3,9 @@ start = result:(testFnCall / ignored_content)* {
 	return result.filter((match) => match.type !== 'ignored');
 }
 
-testFnCall = tags:docblock? fnName:testFnNames modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? {
+testFnCall = tags:docblock? fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? {
 	const nested = testFn.filter((match) => match?.type !== 'ignored');
+	console.log(location());
 	return {
 		type: 'test',
     name: fnName,
@@ -12,6 +13,7 @@ testFnCall = tags:docblock? fnName:testFnNames modifiers:testModifiers* "(" _ de
     modifiers: modifiers,
     codeTags: tags,
 		nested: nested,
+		location: location()
 	}
 }
 
@@ -28,7 +30,9 @@ testDescription =
 	string /
   identifier
 
-testFunction = _ "(" _ functionArgs _ ")" _ "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+testFunction = standardFunction / arrowFunction
+standardFunction = _ "async"? _ "function" _ identifier? _ "(" _ functionArgs _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+arrowFunction = _ "async"? _ "(" _ functionArgs _ ")" [ \t]* "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
 code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
