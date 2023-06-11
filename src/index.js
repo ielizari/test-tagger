@@ -28,6 +28,6 @@ const fileWithDocBlock = `
 
 
 //regexParse(fileWithDocBlock);
-const result = peggyParser.parse(fileWithDocBlock);
-console.dir(result, { depth: null });
+const result = peggyParser.parse(fileWithDocBlock.trim());
+//console.dir(result, { depth: null });
 

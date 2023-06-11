@@ -1,85 +1,43 @@
 
-{{
-	const functions = [
-		"describe",
-		"test",
-		"it",
-		"aleale"
-	];
-}}
-prueba = result:(functionCall / ignored_content)* {
+prueba = result:(testFnCall / ignored_content)* {
+	//return result
 	return result.filter((match) => match.type !== 'ignored');
 }
 
-start = result:item* {
-	log(blocks);
-	//return result;
-	return result
-		.filter((block) => block[0] === 'DOCBLOCK')
-	 	.map((block) => block[1]);
+testFnCall = tags:docblock? fnName:testFnNames modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? {
+	const nested = testFn.filter((match) => match?.type !== 'ignored');
+	return {
+		type: 'test',
+    name: fnName,
+		test: description,
+    modifiers: modifiers,
+    codeTags: tags,
+		nested: nested,
+	}
 }
 
-item
-	= code_tags /
-		content_line
-
-content_line = _ p:content _ {return ['CONTENT',p]}
-content =  p:([^\n]+) {return p.join('')}
-
-code_tags = _ p:docblock _ {return ['DOCBLOCK',p]}
-docblock = "/**" inner:(!"*/" i:code_tag )* "*/" _ { return inner; }
-code_tag = _ "* @" tag:[a-zA-Z0-9_-]* " " value:[ a-zA-Z0-9_-]* {
-	const mTag = tag.join('');
-	const mVal = value.join('');
-	const result = { [mTag]: mVal };
-	blocks.push(result);
-	return result;
-}
-
-test_function = _ target_functions _ "(" _ string _ ")" _
-
-target_functions =
+testFnNames =
 	"describe" /
 	"test" /
 	"it"
 
-functionCall = _ (identifier _ "." _)? name:identifier _ args:functionArgs _ ";"? _ &{ return functions.includes(name) } {
-	const nestedCalls = args.filter(arg => typeof arg === 'object' && arg.type === 'function call');
-	return {
-    	type: 'function call',
-      name: name,
-      args: args,
-			nested: nestedCalls,
-    }
+testModifiers = _ "." _ mod:("skip" / "only" / "each" / "failing" / "concurrent" / identifier) _ { return mod; }
+
+testDescription =
+	string /
+  identifier
+
+testFunction = _ "(" functionArgs* ")" _ "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns }
+
+docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
+code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
+	const mTag = tag;
+	const mVal = value.join('').split(' ');
+	const result = { [mTag]: mVal };
+	return result;
 }
 
-function = standardFunction / arrowFunction
-
-standardFunction =
-	_ "function" _ fname:(identifier) _ fargs:(functionArgs) fcontent:(fn_content) {
-		return {
-			type: 'function declaration',
-			name: fname,
-			args: fargs,
-      content: fcontent,
-		}
-	}
-
-arrowFunction =
-	_ "async"? _ fargs:(functionArgs) _ "=>" _ fcontent:(fn_content) {
-		return {
-			type: 'function call',
-			args: fargs,
-      content: fcontent,
-		}
-	}
-
-
-functionArgs = _ "(" args:(!")" _ arg:( function / $fn_arg) _ ","? { return arg })* ")" _ { return args }
-fn_content = _ "{" content:(fn_inner)* _ "}" _ { return content }
-
-fn_inner = functionCall / i:(!"}" . ) { return i.join('') }
-
+functionArgs = _ "(" args:(!")" _ arg:$fn_arg _ ","? { return arg })* ")" _ { return args }
 fn_arg =
 	//functionCall /
 	//function /
@@ -87,7 +45,6 @@ fn_arg =
 	identifier _ "="_ variable /
 	identifier
 
-variableDeclaration = _ ("const" / "let" / "var") _ "=" _
 variable =
 	identifier /
 	string /
@@ -99,28 +56,11 @@ boolean = "true" / "false"
 float = integer? "." [0-9]+
 integer = "-"? [0-9]+
 string =
-	"\"" text:(!"\"" .)* "\"" { return text.join('')} /
-	"'" text:(!"'" .)* "'" { return text.join('')} /
-	"`" text:(!"`" .)* "`" { return text.join('')}
+	"\"" text:$(!"\"" .)* "\"" { return text } /
+	"'" text:$(!"'" .)* "'" { return text } /
+	"`" text:$(!"`" .)* "`" { return text }
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next }
 
 ignored_content = _ p:([^\n]+) _ {return { type: 'ignored', content: p.join('')}}
 _ = [ \t\r\n]* {return null}
-
-// start = result:item* {
-// 	return result.filter(block => block[0] === 'DOCBLOCK');
-// }
-
-// item = doc / content_line
-
-// content_line = _ p:content _ {return ['CONTENT',p]}
-
-// content =  p:([^\n]+) {return p.join('')}
-// doc = _ p:docblock {return ['DOCBLOCK',p]}
-
-// single = '//' p:([^\n]*) {return p.join('')}
-
-// docblock = "/**" inner:(!"*/" i:. {return i})* "*/" {return inner.join('')}
-
-// _ = [ \t\r\n]* {return null}

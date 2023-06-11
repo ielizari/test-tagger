@@ -15,7 +15,7 @@ function regexParse(code) {
       tags: findAllMatches(doc[0], item)
     });
   });
-  console.log(result)
+  //console.log(result)
   return result;
 }
 
