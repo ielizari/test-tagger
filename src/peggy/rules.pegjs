@@ -1,5 +1,4 @@
-
-prueba = result:(testFnCall / ignored_content)* {
+start = result:(testFnCall / ignored_content)* {
 	//return result
 	return result.filter((match) => match.type !== 'ignored');
 }
@@ -21,13 +20,14 @@ testFnNames =
 	"test" /
 	"it"
 
-testModifiers = _ "." _ mod:("skip" / "only" / "each" / "failing" / "concurrent" / identifier) _ { return mod; }
+testModifiers = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / identifier) _ { return mod; }
+eachModifier = "each" _ "(" _ a:Array? _ ")" { return { type: 'each', values: a }; }
 
 testDescription =
 	string /
   identifier
 
-testFunction = _ "(" functionArgs* ")" _ "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns }
+testFunction = _ "(" _ functionArgs _ ")" _ "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
 code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
@@ -37,7 +37,7 @@ code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
 	return result;
 }
 
-functionArgs = _ "(" args:(!")" _ arg:$fn_arg _ ","? { return arg })* ")" _ { return args }
+functionArgs = _ args:(!")" _ arg:$fn_arg _ ","? _ { return arg; })* _ { return args; }
 fn_arg =
 	//functionCall /
 	//function /
@@ -46,21 +46,23 @@ fn_arg =
 	identifier
 
 variable =
+	Array /
 	identifier /
 	string /
 	float /
 	integer /
 	boolean
 
+Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
 boolean = "true" / "false"
 float = integer? "." [0-9]+
 integer = "-"? [0-9]+
 string =
-	"\"" text:$(!"\"" .)* "\"" { return text } /
-	"'" text:$(!"'" .)* "'" { return text } /
-	"`" text:$(!"`" .)* "`" { return text }
+	"\"" text:$(!"\"" .)* "\"" { return text; } /
+	"'" text:$(!"'" .)* "'" { return text; } /
+	"`" text:$(!"`" .)* "`" { return text; }
 
-identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next }
+identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 
-ignored_content = _ p:([^\n]+) _ {return { type: 'ignored', content: p.join('')}}
-_ = [ \t\r\n]* {return null}
+ignored_content = _ p:([^\n]+) _ { return { type: 'ignored', content: p.join('') }; }
+_ = [ \t\r\n]* { return null; }

@@ -65,16 +65,16 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].modifiers).toStrictEqual([modifier]);
     });
 
-    it.skip('Detects \'each\' modifier', () => {
+    it('Detects \'each\' modifier combined with "only" modifier', () => {
       const input = `
         /**
-         * @tags ${modifier}
+         * @tags modifiers each
          */
-        describe.each([1,2,3])('Test example #1', (data)=>{});
+        describe.only.each([1,2,3])('Test example #1', (data)=>{});
         `;
 
       const analyzed = peggyParser.parse(input.trim());
-      expect(analyzed[0].modifiers).toStrictEqual(['each']);
+      expect(analyzed[0].modifiers).toStrictEqual(['only',{type: 'each', values: ['1','2','3']}]);
     });
 
     it('detects unknown modifier', () => {
