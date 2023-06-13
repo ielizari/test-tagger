@@ -161,5 +161,25 @@ describe('PEGGY Test suite', () => {
       const analyzed = peggyParser.parse(input.trim());
       expect(analyzed[0].test).toEqual('Test example with "single quotes"');
     });
+
+    it('detects nested tests when contains an object assignment with curly braces in multiple lines, with and without semicolon', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+            const obj = {
+              prop: 1,
+            };
+            const obj2 = {
+              prop: 2,
+            }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      console.log(analyzed)
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 });

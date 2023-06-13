@@ -49,8 +49,21 @@ fn_arg =
 	identifier _ "="_ variable /
 	identifier
 
+expression =
+	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
+    assignment
+
+assignment = _ ("const" / "let" / "var")? _ i:$identifier _ "=" _ v:$variable _ ";"? _ {
+	return {
+		type: 'assignment',
+		name: i,
+		values: v
+	}
+}
+
 variable =
 	Array /
+	Object /
 	identifier /
 	string /
 	float /
@@ -58,6 +71,10 @@ variable =
 	boolean
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
+Object =_ "{" _ pair:(!"}" k:ObjectKey v:ObjectValue? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
+ObjectKey = _ k:$(identifier / string / Array) _ { return k; }
+ObjectValue = _ ":" _ v:$variable _ { return v; }
+
 boolean = "true" / "false"
 float = integer? "." [0-9]+
 integer = "-"? [0-9]+
@@ -68,5 +85,7 @@ string =
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 
-ignored_content = _ p:([^\n]+) _ { return { type: 'ignored', content: p.join('') }; }
+ignored_content =
+	p:expression { return { type: 'ignored', content: p}; } /
+	_ p:([^\n]+) _ { return { type: 'ignored', content: p.join('') }; }
 _ = [ \t\r\n]* { return null; }
