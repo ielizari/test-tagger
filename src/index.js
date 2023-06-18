@@ -1,33 +1,20 @@
 const regexParse = require('./regex/parser');
 const peggyParser = require('./peggy').parser;
+const utils = require('./utils/listFiles');
+const fs = require('fs');
 
-const fileWithDocBlock = `
-    /**
-     * @tags pdp add_to_cart
-     * @description Prueba1
-     */
-    describe('Test example #1', () => {
-      console.log('veenga')
-    });
+const parseFile = (file) => {
+  return peggyParser.parse(file.trim());
+}
+utils.parseFiles('./test', parseFile).then(
+  (files) => {
+    utils.createReport(files);
+  },
+  (error) => {
+    console.log('Error', error)
+  }
+);
 
-    /**
-     * @tags pdp add_to_cart
-     * @description Prueba2
-     */
-    describe('Test example #2', () => {
-      console.log('veenga2')
-      /**
-       * @tags finance
-       */
-      describe('Inner test', () => {
-        console.log('vamos');
-      });
-    });
-    `;
-
-
-
-//regexParse(fileWithDocBlock);
-const result = peggyParser.parse(fileWithDocBlock.trim());
+//const result = peggyParser.parse(fileWithDocBlock.trim());
 //console.dir(result, { depth: null });
 

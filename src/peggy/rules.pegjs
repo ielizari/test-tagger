@@ -79,9 +79,9 @@ boolean = "true" / "false"
 float = integer? "." [0-9]+
 integer = "-"? [0-9]+
 string =
-	"\"" text:$(!"\"" .)* "\"" { return text; } /
-	"'" text:$(!"'" .)* "'" { return text; } /
-	"`" text:$(!"`" .)* "`" { return text; }
+	"\"" text:$(!([^\\] "\"") .)* l:([^\\])"\"" { return text+l; } /
+	"'" text:$(!([^\\] "'") .)* l:([^\\])"'" { return text+l; } /
+	"`" text:$(!([^\\] "`") .)* l:([^\\])"`" { return text+l; }
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 

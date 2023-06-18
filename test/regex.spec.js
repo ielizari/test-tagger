@@ -2,10 +2,13 @@ const { describe, expect, it } = require('@jest/globals');
 const { regexParse } = require('../src/regex/parser.js');
 
 /**
- * @tags regex pdp add_to_cart
+ * @tags regex
  */
 describe('RegEx Test suite', () => {
-  it('Detects dockblock', () => {
+  /**
+   * @tags docblock
+   */
+  it('Detects docblock', () => {
     const fileWithDocBlock = `
     /**
      * @tags pdp add_to_cart
@@ -19,6 +22,9 @@ describe('RegEx Test suite', () => {
     expect(analyzed[0].tags[0].groups.itemValue).toBe('pdp add_to_cart');
   });
 
+  /**
+   * @tags docblock
+   */
   it('Detects multiple docblocks', () => {
     const fileWithDocBlock = `
     /**
