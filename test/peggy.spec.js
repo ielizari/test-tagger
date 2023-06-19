@@ -234,7 +234,25 @@ describe('PEGGY Test suite', () => {
         });
         `;
       const analyzed = peggyParser.parse(input.trim());
-      console.log(analyzed)
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags async function curly new-line nested
+     */
+    it('detects nested tests containing an async function call with a function argument with curly braces in multiple lines', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+            myFunction(async () => {
+              myLib.myOtherFunction();
+            });
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });

@@ -1,0 +1,14 @@
+:root {
+  --select-border: #393939;
+  --select-focus: #101484;
+  --select-arrow: var(--select-border);
+}
+
+.hidden {
+  display: none;
+}
+
+.multiselect__dropdown {
+  position: relative;
+  z-index: 2;
+}

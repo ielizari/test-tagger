@@ -3,8 +3,15 @@
   <head>
     <title>Test report - Code Tagger</title>
     <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="../src/view/styles.css" rel="stylesheet">
   </head>
   <body>
+    <div id="table-filters">
+      <button id="filter-fields-control">Todos</button>
+      <div id="filter-fields-dropdown" class="multiselect__dropdown hidden"></div>
+      <input id="filter-input" type="text" />
+      <button id="filter-apply">Filter</button>
+    </div>
     <div id="data-table"></div>
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
     <script type="text/javascript">const reportData=###data###</script>

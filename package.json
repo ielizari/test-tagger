@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "app": "node src/index.js",
-    "test": "jest --verbose",
+    "test": "jest",
     "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs"
   },
   "author": "Iñaki Elizari Reta",

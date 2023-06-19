@@ -3,7 +3,7 @@ start = result:(testFnCall / ignored_content)* {
 	return result.filter((match) => match.type !== 'ignored');
 }
 
-testFnCall = tags:docblock? fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? {
+testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? {
 	const nested = testFn.filter((match) => match?.type !== 'ignored');
 	return {
 		type: 'test',
@@ -41,17 +41,18 @@ code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
 	return result;
 }
 
-functionArgs = _ args:(!")" _ arg:$fn_arg _ ","? _ { return arg; })* _ { return args; }
+functionArgs = _ args:(arg:$fn_arg _ ","? _ { return arg; })* _ { return args; }
 fn_arg =
-	//functionCall /
-	//function /
+	functionCall /
+	function /
 	string /
 	identifier _ "="_ variable /
 	identifier
 
 expression =
 	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
-    assignment
+    assignment /
+    functionCall
 
 assignment = _ ("const" / "let" / "var")? _ i:$identifier _ "=" _ v:$variable _ ";"? _ {
 	return {
@@ -60,6 +61,18 @@ assignment = _ ("const" / "let" / "var")? _ i:$identifier _ "=" _ v:$variable _ 
 		values: v
 	}
 }
+
+functionCall = _ "await"? _ (identifier"." _)* name:identifier _ "(" _ args:(!")" functionArgs) _ ")" _ ";"? _ {
+	return {
+    	type: 'function call',
+        name: name,
+        args: args
+    }
+}
+
+function = 
+standardFunction / 
+arrowFunction
 
 variable =
 	Array /
