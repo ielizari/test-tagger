@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "Utility for code tagging and reporting",
   "main": "src/index.ts",
+  "bin": {
+    "code-tagger": "src/code-tagger-cli.js"
+  },
   "scripts": {
-    "app": "node src/index.js",
+    "app": "node src/code-tagger-cli.js",
     "test": "jest",
-    "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs"
+    "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs",
+    "build": "rm -rf .dist && mkdir .dist && npm pack && mv code-tagger-* .dist"
   },
   "author": "Iñaki Elizari Reta",
   "license": "ISC",

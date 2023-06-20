@@ -76,6 +76,7 @@ const getFilePath = (projectPath) => {
 
 module.exports = {
   readFile,
+  writeFile,
   getFilePath,
   listFiles,
   parseFiles,

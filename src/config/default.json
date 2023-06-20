@@ -1,10 +1,11 @@
 {
   "rootDir": ".",
   "targetDir": [
-    "test"
+    "."
   ],
   "targetFiles": [
     "*.spec.js"
   ],
-  "parser": "peggy"
+  "parser": "peggy",
+  "profiles": []
 }
