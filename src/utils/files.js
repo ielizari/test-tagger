@@ -10,16 +10,17 @@ const listFiles = async (config) => {
   });
 }
 
-const readFile = (projectPath) => {
-  return fs.readFileSync(getFilePath(projectPath), 'utf-8');
+const readFile = (projectPath, basePath) => {
+  return fs.readFileSync(getFilePath(projectPath, basePath), 'utf-8');
 }
 const writeFile = (projectPath, data) => {
   const dirName = path.dirname(projectPath);
   fs.mkdirSync(dirName, { recursive: true });
   fs.writeFileSync(getFilePath(projectPath), data , 'utf-8');
 }
-const getFilePath = (projectPath) => {
-  return path.normalize(path.resolve(process.cwd(), projectPath));
+const getFilePath = (projectPath, basePath) => {
+  if(!basePath) basePath = process.cwd();
+  return path.normalize(path.resolve(basePath, projectPath));
 }
 
 const jsonString = (data) => {
