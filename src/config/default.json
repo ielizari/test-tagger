@@ -8,6 +8,6 @@
     "*/.git/**"
   ],
   "parser": "peggy",
-  "outputDir": ".code-tagger",
+  "outputDir": "report",
   "profiles": []
 }
