@@ -1,10 +1,11 @@
 {
-  "rootDir": ".",
-  "targetDir": [
-    "test"
+  "rootDir": "test",
+  "include": [
+    "**/*spec.js"
   ],
-  "targetFiles": [
-    "*.spec.js"
+  "exclude": [
+    "**/node_modules/**",
+    "**/.git/**"
   ],
-  "parser": "peggy"
+  "outputDir": "report"
 }

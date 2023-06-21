@@ -1,11 +1,13 @@
 {
   "rootDir": ".",
-  "targetDir": [
-    "."
+  "include": [
+    "**/*.spec.js"
   ],
-  "targetFiles": [
-    "*.spec.js"
+  "exclude": [
+    "**/node_modules/**",
+    "*/.git/**"
   ],
   "parser": "peggy",
+  "outputDir": ".code-tagger",
   "profiles": []
 }
