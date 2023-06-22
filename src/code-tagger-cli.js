@@ -6,7 +6,7 @@ const { createReport } = require('./utils/report');
 const { getFilePath } = require('./utils/files');
 
 const [,, ...args] = process.argv;
-const config = getConfig();
+global.config = getConfig();
 
 function getConfig() {
   const defaultConfig = require('./config/default.json');
@@ -21,9 +21,9 @@ const parseFile = (file) => {
   return peggyParser.parse(file.trim());
 }
 
-parseFiles(config, parseFile).then(
+parseFiles(parseFile).then(
   (files) => {
-    createReport(config, files);
+    createReport(files);
   },
   (error) => {
     console.log('Error', error)

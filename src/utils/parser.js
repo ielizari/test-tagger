@@ -10,7 +10,7 @@ const parseFile = (fn, rootDir, filePath) => {
   };
 }
 
-const parseFiles = async(config, fn) => {
+const parseFiles = async(fn) => {
   const files = await listFiles(config);
   return files
     .map((file) => parseFile(fn, config.rootDir, file))

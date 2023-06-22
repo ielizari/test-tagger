@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 
-const listFiles = async (config) => {
+const listFiles = async () => {
   return await glob.glob(config.include, {
     cwd: config.rootDir,
     nodir: true,

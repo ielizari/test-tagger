@@ -24,7 +24,7 @@
       const { title, field } = col._column.definition;
       return { title, field };
     });
-    
+
     columns.forEach((column) => {
       const option = document.createElement('div');
       const checkbox = document.createElement('checkbox');
@@ -33,9 +33,6 @@
       fieldsFilterDropdown.appendChild(option)
       //filterFields.options[filterFields.options.length] = new Option(column.title, column.field);
     });
-
-    
-    
   });
 
   function initControls () {

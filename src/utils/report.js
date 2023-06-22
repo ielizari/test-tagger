@@ -1,6 +1,6 @@
 const { readFile, writeFile, jsonString } = require('./files.js');
 
-const createReport = (config, data) => {
+const createReport = (data) => {
   let template = readFile('../view/report_template.html', __dirname);
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
   const dataString = jsonString(data);
