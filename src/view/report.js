@@ -4,13 +4,31 @@
     dataTree: true,
     dataTreeStartExpanded: true,
     dataTreeChildField: 'nested',
+    layout: "fitColumns",
+    pagination: "local",
+    paginationSize:25,
     history: true,
+    groupBy: 'file',
     columns:[
-    {title:"Description", field:"test", width:650},
-    {title:"File", field:"file", hozAlign:"center", sorter:"date", width:150},
-    {title:"Type", field:"name", width:50, responsive:0},
-    {title:"Modifiers", field:"modifiers", width:150},
-    {title:"Tags", field:"codeTags", width:350},
+    {title:"Description", field:"test", variableHeight: true},
+    //{title:"File", field:"file", hozAlign:"center", sorter:"date", width:150},
+    //{title:"Type", field:"name", responsive:0},
+    {title:"Modifiers", field:"modifiers"},
+    {title:"Tags", field:"codeTags", formatter: function(cell, formatterParams, onRendered) {
+      const cellContainer = document.createElement('div');
+      cellContainer.classList = 'tag-container';
+      const nodes = cell.getValue().map((tag) => {
+        const tagContainer = document.createElement('div');
+        const text = document.createTextNode(tag);
+        tagContainer.classList = 'tag';
+        tagContainer.appendChild(text);
+        return tagContainer;
+      });
+      nodes.forEach((node) => {
+        cellContainer.appendChild(node);
+      });
+      return cellContainer;
+    }},
     ],
   });
 

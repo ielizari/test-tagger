@@ -1,4 +1,7 @@
 :root {
+  --primary-color: rgb(72, 129, 194);
+  --primary-color-higlight: rgb(105, 155, 212);
+  --primary-text-color: rgba(255, 255, 255, 0.87);
   --select-border: #393939;
   --select-focus: #101484;
   --select-arrow: var(--select-border);
@@ -10,15 +13,41 @@
 button {
   border: none;
   padding: 0.5rem;
-  background-color: rgb(61, 72, 173);
-  color: rgb(209, 209, 209);
+  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+}
+
+input[type=text] {
+  padding: 0.5rem;
+  border: none;
+  border-color: var(--primary-color);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
 }
 
 button:hover {
-  background-color: rgb(78, 86, 158);
+  background-color: var(--primary-color-higlight);
   cursor: pointer;
 }
 .multiselect__dropdown {
   position: relative;
   z-index: 2;
+}
+
+.tag-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0.3rem;
+}
+
+.tag {
+  padding: 0.3rem;
+  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+  text-align: center;
+  display: inline-flex;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
 }
