@@ -30,8 +30,8 @@ testDescription =
   identifier
 
 testFunction = standardFunction / arrowFunction
-standardFunction = _ "async"? _ "function" _ identifier? _ "(" _ functionArgs _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
-arrowFunction = _ "async"? _ "(" _ functionArgs _ ")" [ \t]* "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+standardFunction = _ "async"? _ "function" _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+arrowFunction = _ "async"? _ "(" _ functionArgs? _ ")" [ \t]* "=>" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
 code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
@@ -43,19 +43,18 @@ code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
 
 functionArgs = _ args:(arg:$fn_arg _ ","? _ { return arg; })* _ { return args; }
 fn_arg =
-	functionCall /
 	function /
-	string /
-	identifier _ "="_ variable /
-	identifier
+	functionCall /
+	variable /
+	identifier _ "="_ variable
 
 expression =
 	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
     assignment /
     functionCall /
-		import
+	import
 
-assignment = _ ("const" / "let" / "var")? _ i:$identifier _ "=" _ v:$variable _ ";"? _ {
+assignment = _ ("const" / "let" / "var")? _ (identifier"." _)* i:$identifier _ "=" _ v:(functionCall/function/$variable) _ ";"? _ {
 	return {
 		type: 'assignment',
 		name: i,
@@ -63,7 +62,7 @@ assignment = _ ("const" / "let" / "var")? _ i:$identifier _ "=" _ v:$variable _ 
 	}
 }
 
-functionCall = _ "await"? _ (identifier"." _)* name:identifier _ "(" _ args:(!")" functionArgs) _ ")" _ ";"? _ {
+functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ (identifier"." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ";"? _ {
 	return {
     	type: 'function call',
         name: name,
@@ -92,9 +91,9 @@ variable =
 	boolean
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
-Object =_ "{" _ pair:(!"}" k:ObjectKey v:ObjectValue? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
-ObjectKey = _ k:$(identifier / string / Array / integer) _ { return k; }
-ObjectValue = _ ":" _ v:$variable _ { return v; }
+Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey) v:ObjectValue? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
+ObjectKey = _ k:$(functionCall / identifier / string / Array / integer) _ { return k; }
+ObjectValue = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
 
 boolean = "true" / "false"
 float = integer? "." [0-9]+
@@ -104,9 +103,16 @@ string =
 	"'" text:$(!([^\\] "'") .)* l:([^\\])"'" { return text+l; } /
 	"`" text:$(!([^\\] "`") .)* l:([^\\])"`" { return text+l; }
 
+typeOperator = "typeof" / "instanceof"
+bitwiseOperator = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
+logicalOperator = "&&" / "||" / notOperator
+notOperator = "!"
+comparisonOperator = "===" / "!==" / "==" / "!=" / "<=" / "<" / ">=" / ">" / "??" / "?"
+spreadOperator = "..."
+
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 
 ignored_content =
 	p:expression { return { type: 'ignored', content: p}; } /
 	_ p:([^\n]+) _ { return { type: 'ignored', content: p.join('') }; }
-_ = [ \t\r\n]* { return null; }
+_ = [ \t\r\n]* { return null; } 

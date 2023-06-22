@@ -263,16 +263,138 @@ describe('PEGGY Test suite', () => {
     it('detects nested tests containing an object with nested objects in multiple lines and numbers as keys', () => {
       const input = `
         describe('Test example with curly', ()=>{
-          const paginatedPlacements = {
+          const myObj = {
             1: {
-              'header': {},
-              'top_page': {}
+              'key_one': {},
+              'key_two': {}
             },
             2: {
-              'header': {},
-              'product_preview[3]': {},
+              'keyone': {},
+              'other_key[0]': {},
             },
           };
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags assignment arrow-function argument objectcurly new-line nested
+     */
+    it('detects nested tests containing an assignment of an arrow function with an object as argument', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const myObj = ({
+            argKey1,
+            argKey2
+          }) => {
+            console.log('test);
+          }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags assignment arrow-function argument object spread curly new-line nested
+     */
+    it('detects nested tests containing an assignment of an arrow function with an object as argument', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          let myvar;
+          myvar = aFunction({
+            ...mFunc()
+          });
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags assignment arrow-function argument object return curly new-line nested
+     */
+    it('detects nested tests containing an assignment of an arrow function with return statement \
+    of a function call with an object arg in multiple lines', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const aFunction = (args) => {
+            return mFunc({
+              a
+            });
+          });
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags assignment object merge spread curly new-line nested
+     */
+    it('detects nested tests containing an assignment of an object composed with a merge of multiple spreaded objects in multiple lines', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const aFunction = {
+            ...obj1,
+            ...obj2,
+          };
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags assignment object curly new-line nested
+     */
+    it('detects nested tests containing an assignment to an object contained in another', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          window.obj = lib.fn(function() {
+            this.anotherFn = lib.fn2();
+          })
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags assignment object curly new-line nested
+     */
+    it('detects nested tests containing an object with a value obtained through a function call', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop: lib.fn2();
+          }
           it('Second test example', () => {
             console.log('testing')
           })
