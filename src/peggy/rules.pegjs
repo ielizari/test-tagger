@@ -52,7 +52,8 @@ fn_arg =
 expression =
 	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
     assignment /
-    functionCall
+    functionCall /
+		import
 
 assignment = _ ("const" / "let" / "var")? _ i:$identifier _ "=" _ v:$variable _ ";"? _ {
 	return {
@@ -74,6 +75,13 @@ function =
 standardFunction / 
 arrowFunction
 
+import = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })+  _ "}"? _ "from" _ string _ ";" _ {
+	return {
+		type: 'import',
+		names: i
+	}
+}
+
 variable =
 	Array /
 	Object /
@@ -85,7 +93,7 @@ variable =
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
 Object =_ "{" _ pair:(!"}" k:ObjectKey v:ObjectValue? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
-ObjectKey = _ k:$(identifier / string / Array) _ { return k; }
+ObjectKey = _ k:$(identifier / string / Array / integer) _ { return k; }
 ObjectValue = _ ":" _ v:$variable _ { return v; }
 
 boolean = "true" / "false"

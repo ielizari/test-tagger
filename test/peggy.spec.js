@@ -256,5 +256,31 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
+
+    /**
+     * @tags object curly new-line nested
+     */
+    it('detects nested tests containing an object with nested objects in multiple lines and numbers as keys', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const paginatedPlacements = {
+            1: {
+              'header': {},
+              'top_page': {}
+            },
+            2: {
+              'header': {},
+              'product_preview[3]': {},
+            },
+          };
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 });

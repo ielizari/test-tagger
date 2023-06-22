@@ -2,7 +2,7 @@
 const config = {
   verbose: true,
   testPathIgnorePatterns: [
-    "test/prueba.spec.js",
+    "test/prueba.spec.js"
   ],
 };
 
