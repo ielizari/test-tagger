@@ -7,7 +7,17 @@
 .hidden {
   display: none;
 }
+button {
+  border: none;
+  padding: 0.5rem;
+  background-color: rgb(61, 72, 173);
+  color: rgb(209, 209, 209);
+}
 
+button:hover {
+  background-color: rgb(78, 86, 158);
+  cursor: pointer;
+}
 .multiselect__dropdown {
   position: relative;
   z-index: 2;

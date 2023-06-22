@@ -5,7 +5,13 @@ const { parseFiles } = require('./utils/parser');
 const { createReport } = require('./utils/report');
 const { getFilePath } = require('./utils/files');
 
+global.debug = false;
+
 const [,, ...args] = process.argv;
+if(args.includes('--debug')) {
+  global.debug = true;
+}
+
 global.config = getConfig();
 
 function getConfig() {
