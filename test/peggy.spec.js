@@ -466,13 +466,18 @@ describe('PEGGY Test suite', () => {
     });
 
     /**
-     * @tags function-call chained return curly new-line nested
+     * @tags conditional if else else-if return curly new-line nested
      */
-    it.skip('detects nested tests containing a chained function call with a return statement', () => {
+    it('detects nested tests containing conditional statements', () => {
       const input = `
         describe('Test example with curly', ()=>{
-          if (obj == a) {
-          }
+          if (payload.type === 'skus') {
+                return getStockResponse();
+              } else if (payload.type === 'product'){
+                return getStockByProductResponse();
+              }else{
+                yipikayey()
+              }
           it('Second test example', () => {
             console.log('testing')
           })
@@ -484,6 +489,24 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
 
-    
+    /**
+     * @tags object string empty curly new-line nested
+     */
+    it('detects nested tests containing object assignment with empty string value', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            'my-key': '',
+          }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      console.log(analyzed)
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 });

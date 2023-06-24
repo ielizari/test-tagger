@@ -31,7 +31,7 @@ testDescription =
 
 testFunction = standardFunction / arrowFunction
 standardFunction = _ "async"? _ "function" _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
-arrowFunction = _ "async"? _ "(" _ functionArgs? _ ")" [ \t]* "=>" _ "{" _ "return"? _ blockFns:(!"}" block:((testFnCall) / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+arrowFunction = _ "async"? _ "(" _ functionArgs? _ ")" [ \t]* "=>" _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
 code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
@@ -81,8 +81,16 @@ import = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })+  _ "}
 		names: i
 	}
 }
-conditional = _ "if" _ "(" _ (!")") _  ")" _
-return = _ "return" _ (function / functionCall / variable)? _ ";"? _
+
+
+conditional = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? _ ("else" _ conditionalContent)? _ {
+	return {
+    	type: 'ignored',
+    };
+}
+conditionalContent = _ "(" _ (!")" (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")" _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _ 
+
+return = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? _
 
 variable =
 	Array /
@@ -94,7 +102,7 @@ variable =
 	boolean
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
-Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey) v:ObjectValue? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
+Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
 ObjectKey = _ k:$(functionCall / identifier / string / Array / integer) _ { return k; }
 ObjectValue = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
 
@@ -102,9 +110,12 @@ boolean = "true" / "false"
 float = integer? "." [0-9]+
 integer = "-"? [0-9]+
 string =
-	"\"" text:$(!([^\\] "\"") .)* l:([^\\])"\"" { return text+l; } /
-	"'" text:$(!([^\\] "'") .)* l:([^\\])"'" { return text+l; } /
-	"`" text:$(!([^\\] "`") .)* l:([^\\])"`" { return text+l; }
+	"\"\"" /
+	"''" /
+    "``" /
+	"\"" _ text:$(!([^\\] "\"") .)* l:([^\\]) _ "\"" { return text+l; } /
+	"'" _ text:$(!([^\\] "'") .)* l:([^\\]) _ "'" { return text+l; } /
+	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; }
 
 typeOperator = "typeof" / "instanceof"
 bitwiseOperator = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
@@ -113,10 +124,14 @@ notOperator = "!"
 comparisonOperator = "===" / "!==" / "==" / "!=" / "<=" / "<" / ">=" / ">" / "??" / "?"
 spreadOperator = "..."
 
+operand = variable
+comparison = _ operand _ comparisonOperator _ operand _
+
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 
 ignored_content =
 	p:expression { return { type: 'ignored', location: location(), content: p}; } /
 	p:variable { return { type: 'ignored', location: location(), content: p}; } /
+    p:function { return { type: 'ignored', location: location(), content: p}; } /
 	_ p:([^\n]+) _ { return { type: 'ignored', location: location(), content: p.join('') }; }
 _ = [ \t\r\n]* { return null; }
