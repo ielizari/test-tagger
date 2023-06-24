@@ -1,10 +1,17 @@
 start = result:(testFnCall / ignored_content)* {
-	//return result
+	return result
 	return result.filter((match) => match.type !== 'ignored');
 }
 
 testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? _ {
-	const nested = testFn.filter((match) => match?.type !== 'ignored');
+	let nested = [];
+	if(Array.isArray(testFn)) {
+		nested = testFn.filter((match) => match.type && match.type !== 'ignored');
+	} else {
+		if (testFn.type && testFn.type !== 'ignored') {
+			nested.push(testFn);
+		}
+	}
 	return {
 		type: 'test',
     name: fnName,
@@ -31,7 +38,9 @@ testDescription =
 
 testFunction = standardFunction / arrowFunction
 standardFunction = _ "async"? _ "function" _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
-arrowFunction = _ "async"? _ "(" _ functionArgs? _ ")" [ \t]* "=>" _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+arrowFunction = _ "async"? _ "(" _ functionArgs? _ ")" [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
+directBlock = _ block:(expression / variable) _ { return block; }
+curlyBlock = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
 code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
