@@ -1,5 +1,5 @@
 start = result:(testFnCall / ignored_content)* {
-	return result
+	//return result
 	return result.filter((match) => match.type !== 'ignored');
 }
 
@@ -37,9 +37,10 @@ testDescription =
   identifier
 
 testFunction = standardFunction / arrowFunction
-standardFunction = _ "async"? _ "function" _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
-arrowFunction = _ "async"? _ "(" _ functionArgs? _ ")" [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
-directBlock = _ block:(expression / variable) _ { return block; }
+standardFunction = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+arrowFunction = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
+arrowFnArgs = _ "(" _ functionArgs? _ ")" _ / _ identifier _
+directBlock = _ block:(testFnCall / ignored_content) _ { return block; }
 curlyBlock = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
@@ -112,7 +113,7 @@ variable =
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
 Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
-ObjectKey = _ k:$(functionCall / identifier / string / Array / integer) _ { return k; }
+ObjectKey = _ k:$(function / functionCall / identifier / string / Array / integer) _ { return k; }
 ObjectValue = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
 
 boolean = "true" / "false"

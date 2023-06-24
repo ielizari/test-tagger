@@ -525,7 +525,7 @@ describe('PEGGY Test suite', () => {
     });
 
     /**
-     * @tags object string empty curly new-line nested
+     * @tags function-call return empty curly new-line nested
      */
     it('detects nested tests containing test function call returning a variable without curly braces', () => {
       const input = `
@@ -540,6 +540,46 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('direct fn');
       expect(analyzed[0].nested[1].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags object function-declaration curly new-line nested
+     */
+    it('detects nested tests containing object with a function declaration without keyword "function"', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            func() {
+              console.log('my func')
+            }
+          }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags object function-call chain curly new-line nested
+     */
+    it('detects nested tests containing object chained function call with argument not including parenthesis', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          obj.forEach(item => {
+            console.log('my item')
+          })
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
   });
 });
