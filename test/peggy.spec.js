@@ -599,6 +599,24 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('test regex');
       expect(analyzed[0].nested[1].test).toEqual('Second test example');
     });
-    
+
+    /**
+     * @tags regex curly new-line nested
+     */
+    it('detects nested tests when there is a commented line (conflict with regex rule)', () => {
+      const input = `
+        // code comment
+        describe('Test example with curly', ()=>{
+          it('test regex', () => expect(wrapper.getByText(/footer.newsletter.subtitle/i)).toBeInTheDocument())
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('test regex');
+      expect(analyzed[0].nested[1].test).toEqual('Second test example');
+    });
   });
 });
