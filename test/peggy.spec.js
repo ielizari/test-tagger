@@ -608,6 +608,7 @@ describe('PEGGY Test suite', () => {
         // code comment
         describe('Test example with curly', ()=>{
           it('test regex', () => expect(wrapper.getByText(/footer.newsletter.subtitle/i)).toBeInTheDocument())
+          // another comment
           it('Second test example', () => {
             console.log('testing')
           })

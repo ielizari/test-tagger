@@ -138,7 +138,9 @@ spreadOperator = "..."
 operand = variable
 comparison = _ operand _ comparisonOperator _ operand _
 
-regex = _ "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
+regex = _ !singleLineComment "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
+comment = singleLineComment
+singleLineComment = _ "//" p:$([^\n]*) {return p }
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 
