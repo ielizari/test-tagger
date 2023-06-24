@@ -39,6 +39,7 @@ button:hover {
   display: flex;
   flex-direction: row;
   gap: 0.3rem;
+  flex-wrap: wrap;
 }
 
 .tag {
@@ -50,4 +51,8 @@ button:hover {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
+}
+
+.tabulator-cell {
+  height: auto !important;
 }

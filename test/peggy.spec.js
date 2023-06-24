@@ -404,5 +404,86 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
+
+    /**
+     * @tags function-call chained object curly new-line nested
+     */
+    it('detects nested tests containing a function call with chained object accessor', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          func(obj.nested.el, {
+            prop: 1,
+          })
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags function-call chained curly new-line nested
+     */
+    it('detects nested tests containing a function call with chained object accessor', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          func(obj).func2({
+            prop: 1,
+          })
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags function-call chained return curly new-line nested
+     */
+    it('detects nested tests containing a chained function call with a return statement', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const formattedProduct = map((cProduct) => {
+            return {
+              data: cProduct,
+            };
+          });
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      console.log(analyzed)
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags function-call chained return curly new-line nested
+     */
+    it.skip('detects nested tests containing a chained function call with a return statement', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          if (obj == a) {
+          }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      console.log(analyzed)
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    
   });
 });

@@ -10,11 +10,11 @@
     history: true,
     groupBy: 'file',
     columns:[
-    {title:"Description", field:"test", variableHeight: true},
+    {title:"Description", field:"test", variableHeight: true, widthGrow:2},
     //{title:"File", field:"file", hozAlign:"center", sorter:"date", width:150},
     //{title:"Type", field:"name", responsive:0},
-    {title:"Modifiers", field:"modifiers"},
-    {title:"Tags", field:"codeTags", formatter: function(cell, formatterParams, onRendered) {
+    {title:"Modifiers", field:"modifiers", width:150, widthShrink:2},
+    {title:"Tags", field:"codeTags", widthGrow:1, formatter: function(cell, formatterParams, onRendered) {
       const cellContainer = document.createElement('div');
       cellContainer.classList = 'tag-container';
       const nodes = cell.getValue().map((tag) => {

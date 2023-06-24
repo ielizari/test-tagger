@@ -18,7 +18,7 @@ const createReport = (data) => {
 const getReportCss = (content) => {
   return debug ?
     '<link rel="stylesheet" href="../src/view/style.css">' :
-    '<style">' + content + '</style>';
+    '<style>' + content + '</style>';
 }
 const getReportScript = (content) => {
   return debug ?
