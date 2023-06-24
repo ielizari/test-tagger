@@ -601,7 +601,7 @@ describe('PEGGY Test suite', () => {
     });
 
     /**
-     * @tags regex curly new-line nested
+     * @tags regex comment curly new-line nested
      */
     it('detects nested tests when there is a commented line (conflict with regex rule)', () => {
       const input = `
