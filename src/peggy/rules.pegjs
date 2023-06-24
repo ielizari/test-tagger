@@ -125,7 +125,8 @@ string =
     "``" /
 	"\"" _ text:$(!([^\\] "\"") .)* l:([^\\]) _ "\"" { return text+l; } /
 	"'" _ text:$(!([^\\] "'") .)* l:([^\\]) _ "'" { return text+l; } /
-	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; }
+	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; } /
+    regex
 
 typeOperator = "typeof" / "instanceof"
 bitwiseOperator = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
@@ -136,6 +137,8 @@ spreadOperator = "..."
 
 operand = variable
 comparison = _ operand _ comparisonOperator _ operand _
+
+regex = _ "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
 
