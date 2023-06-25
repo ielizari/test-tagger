@@ -765,5 +765,27 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('second test example');
     });
 
+    /**
+     * @tags array assignment new-line nested
+     */
+    it('detects nested tests containing assignment to an array element', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          myArray[2] = {
+            key1: 1
+          }
+          myArray[index] = {
+            key2: 2,
+          }
+          it('second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+    });
+
   });
 });

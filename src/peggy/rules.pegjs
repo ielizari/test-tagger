@@ -152,7 +152,7 @@ regex = _ !singleLineComment "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
 comment = singleLineComment
 singleLineComment = _ "//" p:$([^\n]*) {return p }
 
-identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* { return first+next; }
+identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
 
 ignored_content =
 	p:expression { return { type: 'ignored', location: location(), content: p}; } /
