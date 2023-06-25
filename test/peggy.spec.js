@@ -839,7 +839,7 @@ describe('PEGGY Test suite', () => {
           const obj = {
             prop1: 1,
             // prop2: 2,
-            prop2: 5
+            prop2: 5, // a comment
           }
           it('second test example', () => {
             console.log('testing')
