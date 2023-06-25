@@ -830,5 +830,26 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('second test example');
     });
 
+    /**
+     * @tags object comment new-line nested
+     */
+    it('detects nested tests containing an object declaration with multiple lines and one of them commented', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop1: 1,
+            // prop2: 2,
+            prop2: 5
+          }
+          it('second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+    });
+
   });
 });

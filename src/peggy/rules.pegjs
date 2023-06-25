@@ -127,7 +127,7 @@ variable =
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
 Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
-ObjectKey = _ k:$(function / functionCall / identifier / string / Array / integer) _ { return k; }
+ObjectKey = _ k:$(function / functionCall / identifier / string / Array / integer / ignored_content) _ { return k; }
 ObjectValue = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
 
 boolean = "true" / "false"
@@ -159,6 +159,7 @@ singleLineComment = _ "//" p:$([^\n]*) {return p }
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
 
 ignored_content =
+	p:comment { return { type: 'ignored', location: location(), content: p}; } /
 	p:expression { return { type: 'ignored', location: location(), content: p}; } /
 	p:variable { return { type: 'ignored', location: location(), content: p}; } /
     p:function { return { type: 'ignored', location: location(), content: p}; } /
