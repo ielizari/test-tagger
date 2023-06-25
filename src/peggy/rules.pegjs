@@ -65,7 +65,7 @@ expression =
 	import /
   return
 
-assignment = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(functionCall/function/$variable) _ ";"? _ {
+assignment = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/$variable) _ ";"? _ {
 	return {
 		type: 'assignment',
 		name: i,

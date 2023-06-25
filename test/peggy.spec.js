@@ -712,5 +712,27 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('second test example');
     });
 
+    /**
+     * @tags variable async function new-line nested
+     */
+    it('detects nested tests containing async function assignment', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const func = async (options) => {
+            console.log('async func');
+          }
+          const func2 = async function () {
+            console.log('async func2')
+          }
+          it('second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+    });
+
   });
 });
