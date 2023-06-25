@@ -497,6 +497,27 @@ describe('PEGGY Test suite', () => {
     });
 
     /**
+     * @tags conditional if new-line nested
+     */
+    it('detects nested tests containing conditional statement without curly braces', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          if (setPromosPerProduct) {
+            doNothing()
+          } else {
+            if (index !== -1) doSomething();
+          }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
      * @tags object string empty curly new-line nested
      */
     it('detects nested tests containing object assignment with empty string value', () => {

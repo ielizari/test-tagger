@@ -108,7 +108,7 @@ conditional = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? 
     	type: 'ignored',
     };
 }
-conditionalContent = _ "(" _ (!")" (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")" _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _
+conditionalContent = _ "(" _ (!")" notOperator? _ (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")" _ "{"? _ (!"}" (testFnCall/ignored_content) _ )* _ "}"? _
 
 return = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? _
 
