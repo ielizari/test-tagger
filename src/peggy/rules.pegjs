@@ -29,7 +29,7 @@ testFnNames =
 	"it"
 
 testModifiers = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / unknownModifier) _ { return mod; }
-eachModifier = "each" _ "(" _ a:Array? _ ")" { return { type: 'each', values: a }; }
+eachModifier = "each" _ "(" _ a:(Array / identifier / functionCall)? _ ")" { return { type: 'each', values: a }; }
 unknownModifier =  i:identifier { return { type: 'unknown', value: i }; }
 
 testDescription =
@@ -122,7 +122,7 @@ variable =
 	boolean
 
 Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
-Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
+Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
 ObjectKey = _ k:$(function / functionCall / identifier / string / Array / integer) _ { return k; }
 ObjectValue = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
 

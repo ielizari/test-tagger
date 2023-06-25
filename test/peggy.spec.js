@@ -88,6 +88,15 @@ describe('PEGGY Test suite', () => {
     });
 
     /**
+     * @tags each
+     */
+    it('detects \'each\' modifier when table is passed as a variable', () => {
+      const input = "describe.only.each(table)('Test example #1', (data)=>{});";
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].modifiers).toStrictEqual(['only',{type: 'each', values: 'table'}]);
+    });
+
+    /**
      * @tags unknown
      */
     it('detects unknown modifier', () => {
@@ -723,6 +732,28 @@ describe('PEGGY Test suite', () => {
           }
           const func2 = async function () {
             console.log('async func2')
+          }
+          it('second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+    });
+
+    /**
+     * @tags object chain new-line nested
+     */
+    it('detects nested tests object with keys obtained through chaining', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            obj2.key1.value,
+            obj2.key1.value: 3,
+            ...func().value,
+            ...func().value: 5
           }
           it('second test example', () => {
             console.log('testing')
