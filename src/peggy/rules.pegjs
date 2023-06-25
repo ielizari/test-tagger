@@ -65,13 +65,20 @@ expression =
 	import /
   return
 
-assignment = _ ("const" / "let" / "var")? _ (identifier"." _)* i:$identifier _ "=" _ v:(functionCall/function/$variable) _ ";"? _ {
+assignment = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(functionCall/function/$variable) _ ";"? _ {
 	return {
 		type: 'assignment',
 		name: i,
 		values: v
 	}
 }
+
+assignmentOperands =
+    "{" _ !"}"_ i:assignmentVariable+ _ "}" _ { return i} /
+    "[" _ !"]"_ i:(assignmentVariable / _ "," _ )+ _ "]" _ { return i} /
+	assignmentVariable
+
+assignmentVariable = _ v:((identifier _ "." _)* i:$identifier _ ","?)+ _ { return v}
 
 functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
 	const nested = Array.isArray(args) ? args.filter(arg => arg).flat(Number.POSITIVE_INFINITY) : new Array(args);
@@ -101,7 +108,7 @@ conditional = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? 
     	type: 'ignored',
     };
 }
-conditionalContent = _ "(" _ (!")" (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")" _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _ 
+conditionalContent = _ "(" _ (!")" (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")" _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _
 
 return = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? _
 

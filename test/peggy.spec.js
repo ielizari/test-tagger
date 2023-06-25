@@ -685,5 +685,32 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('second test example');
     });
 
+    /**
+     * @tags variable destructuring new-line nested
+     */
+    it('detects nested tests containing variable declarations using destructuring to pick only the desired ones', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          const { a, b } = mFunc({
+            options
+          })
+          const [,,third,] = ...[
+            {
+              a, b,
+            },
+            2,
+            3,
+            4
+          ]
+          it('second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+    });
+
   });
 });
