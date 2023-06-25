@@ -108,7 +108,7 @@ return = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? 
 variable =
 	Array /
 	Object /
-	identifier (_ "." _ identifier)* /
+	identifier _ "?"? (_ "." _ identifier)* /
 	string /
 	float /
 	integer /

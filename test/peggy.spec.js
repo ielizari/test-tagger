@@ -645,9 +645,6 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[1].test).toEqual('b');
     });
 
-    /**
-     * @tags function-call new-line nested
-     */
     it('detects nested tests containing chained function call with new line', () => {
       const input = `
         describe('Test example with curly', ()=>{
@@ -666,6 +663,26 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('first test example');
       expect(analyzed[0].nested[1].test).toEqual('second test example');
+    });
+
+    /**
+     * @tags function-call chain new-line nested
+     */
+    it('detects nested tests containing chained function call with optional chaining operator', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          obj = {
+            keyA: otherObj?.prop,
+            keyB: 2
+          }
+          it('second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
     });
 
   });
