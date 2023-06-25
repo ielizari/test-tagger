@@ -626,13 +626,13 @@ describe('PEGGY Test suite', () => {
     it('detects nested tests inside non-test function calls', () => {
       const input = `
         describe('Stock', () => {
-          forEach(status => {
+          ['a',2].forEach(status => {
             describe('a',  () => {
               it('c', () => {
               })
             });
           });
-        forEach(status => {
+          anArray.forEach(status => {
             it('b',  () => {
             });
           });
