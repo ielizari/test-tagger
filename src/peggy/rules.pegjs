@@ -6,9 +6,9 @@ start = result:(testFnCall / ignored_content)* {
 testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? _ {
 	let nested = [];
 	if(Array.isArray(testFn)) {
-		nested = testFn.filter((match) => match.type && match.type !== 'ignored');
+		nested = testFn.flat(Number.POSITIVE_INFINITY).filter((match) => match.type && match.type === 'test');
 	} else {
-		if (testFn.type && testFn.type !== 'ignored') {
+		if (testFn.type && testFn.type === 'test') {
 			nested.push(testFn);
 		}
 	}
@@ -41,7 +41,7 @@ standardFunction = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? 
 arrowFunction = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
 arrowFnArgs = _ "(" _ functionArgs? _ ")" _ / _ identifier _
 directBlock = _ block:(testFnCall / ignored_content) _ { return block; }
-curlyBlock = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+curlyBlock = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
 code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
@@ -51,7 +51,7 @@ code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
 	return result;
 }
 
-functionArgs = _ args:(arg:$fn_arg _ ","? _ { return arg; })* _ { return args; }
+functionArgs = _ args:(arg:fn_arg _ ","? _ { return arg; })* _ { return args; }
 fn_arg =
 	function /
 	functionCall /
@@ -74,10 +74,13 @@ assignment = _ ("const" / "let" / "var")? _ (identifier"." _)* i:$identifier _ "
 }
 
 functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ (identifier"." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
-	return {
+	const nested = Array.isArray(args) ? args.filter(arg => arg).flat(Number.POSITIVE_INFINITY) : new Array(args);
+	const nestedTests = nested.filter(item => item?.type === 'test')
+	if (nestedTests.length) return nestedTests;
+    return {
     	type: 'function call',
         name: name,
-        args: args
+        args: nested,
     }
 }
 

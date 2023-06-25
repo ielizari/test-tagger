@@ -619,5 +619,31 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('test regex');
       expect(analyzed[0].nested[1].test).toEqual('Second test example');
     });
+
+    /**
+     * @tags function-call new-line nested
+     */
+    it('detects nested tests inside non-test function calls', () => {
+      const input = `
+        describe('Stock', () => {
+          forEach(status => {
+            describe('a',  () => {
+              it('c', () => {
+              })
+            });
+          });
+        forEach(status => {
+            it('b',  () => {
+            });
+          });
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Stock');
+      expect(analyzed[0].nested[0].test).toEqual('a');
+      expect(analyzed[0].nested[0].nested[0].test).toEqual('c');
+      expect(analyzed[0].nested[1].test).toEqual('b');
+    });
+
   });
 });
