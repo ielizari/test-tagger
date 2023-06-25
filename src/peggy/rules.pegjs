@@ -73,7 +73,7 @@ assignment = _ ("const" / "let" / "var")? _ (identifier"." _)* i:$identifier _ "
 	}
 }
 
-functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable)"." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
+functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
 	const nested = Array.isArray(args) ? args.filter(arg => arg).flat(Number.POSITIVE_INFINITY) : new Array(args);
 	const nestedTests = nested.filter(item => item?.type === 'test')
 	if (nestedTests.length) return nestedTests;
