@@ -37,7 +37,7 @@ testDescription =
   identifier
 
 testFunction = standardFunction / arrowFunction
-standardFunction = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(testFnCall / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+standardFunction = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 arrowFunction = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
 arrowFnArgs = _ "(" _ functionArgs? _ ")" _ / _ identifier _
 directBlock = _ block:(testFnCall / ignored_content) _ { return block; }
@@ -59,10 +59,12 @@ fn_arg =
 	identifier _ "="_ variable
 
 expression =
+	conditional /
 	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
   assignment /
   functionCall /
 	import /
+  $delete /
   return
 
 assignment = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/$variable) _ ";"? _ {
@@ -108,9 +110,11 @@ conditional = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? 
     	type: 'ignored',
     };
 }
-conditionalContent = _ "(" _ (!")" notOperator? _ (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")" _ "{"? _ (!"}" (testFnCall/ignored_content) _ )* _ "}"? _
+conditionalContent = _ ("(" _ (!")" notOperator? _ (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")")? _ conditionalBlock _
+conditionalBlock = _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _
 
 return = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? _
+delete = _ "delete" _ f:$(identifier v:$(_ "." _ identifier _)*) _ ";"? _
 
 variable =
 	Array /

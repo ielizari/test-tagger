@@ -513,6 +513,28 @@ describe('PEGGY Test suite', () => {
         });
         `;
       const analyzed = peggyParser.parse(input.trim());
+      console.log(analyzed)
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags conditional if new-line nested
+     */
+    it('detects nested tests containing delete expression inside of an "else" conditional block', () => {
+      const input = `
+        describe('Test example with curly', ()=>{
+          if (setPromosPerProduct) {
+            doNothing()
+          } else {
+            delete obj.prop.val;
+          }
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
