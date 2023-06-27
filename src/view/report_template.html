@@ -7,10 +7,12 @@
   </head>
   <body>
     <div id="table-filters">
-      <button id="filter-fields-control">Todos</button>
-      <div id="filter-fields-dropdown" class="multiselect__dropdown hidden"></div>
-      <input id="filter-input" type="text" />
-      <button id="filter-apply">Filter</button>
+      <form id="filter-form">
+        <button id="filter-fields-control">Todos</button>
+        <div id="filter-fields-dropdown" class="multiselect__dropdown hidden"></div>
+        <input id="filter-input" type="text" />
+        <button id="filter-apply" type="submit">Filter</button>
+      </form>
     </div>
     <div id="data-table"></div>
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>

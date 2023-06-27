@@ -26,6 +26,12 @@ const mapNode = (file, content, parentTags) => {
     }
     item.codeTags = tags;
     item.nested = item.nested?.length ? mapNode(file, item.nested, tags) : [];
+    item.nestedItemsCount = item.nested.reduce((total, test) => {
+      return {
+        items: total.items + test.nestedItemsCount.items + 1,
+        tests: test.type === 'test' && ['it', 'test'].includes(test.name) ? total.tests + test.nestedItemsCount.tests + 1 : total.tests + test.nestedItemsCount.tests,
+      }
+    }, { items: 0, tests: 0 });
     return treeDTO(item, file);
   });
   return result;
@@ -36,9 +42,18 @@ const treeDTO = (test, file) => {
     const [key, value] = item;
     return result.concat(value);
   }, []);
+  const modifiers = test.modifiers.map((modifier) => {
+    if (typeof modifier === 'object') {
+      return modifier.type;
+    }
+    return modifier;
+  })
+
   return {
     ...test,
     codeTags: tags,
+    modifiers: modifiers,
+    itemCount: test.nestedItemsCount,
     file,
   }
 }

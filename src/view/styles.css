@@ -19,7 +19,8 @@ button {
 
 input[type=text] {
   padding: 0.5rem;
-  border: none;
+  border-width: 1px;
+  border-style: solid;
   border-color: var(--primary-color);
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
@@ -55,4 +56,8 @@ button:hover {
 
 .tabulator-cell {
   height: auto !important;
+}
+
+#table-filters {
+  padding: 1rem;
 }
