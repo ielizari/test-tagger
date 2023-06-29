@@ -6,13 +6,12 @@ const { createReport } = require('./utils/report');
 const { getFilePath } = require('./utils/files');
 
 global.debug = false;
+global.config = getConfig();
 
 const [,, ...args] = process.argv;
 if(args.includes('--debug')) {
   global.debug = true;
 }
-
-global.config = getConfig();
 
 function getConfig() {
   const defaultConfig = require('./config/default.json');
@@ -24,7 +23,9 @@ function getConfig() {
 }
 
 const parseFile = (file) => {
-  return peggyParser.parse(file.trim());
+  return peggyParser.parse(file.trim(), {
+    autotag: config.autotag
+  });
 }
 
 parseFiles(parseFile).then(

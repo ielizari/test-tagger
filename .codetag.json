@@ -7,5 +7,24 @@
     "**/node_modules/**",
     "**/.git/**"
   ],
-  "outputDir": "report"
+  "outputDir": "report",
+  "autotag": {
+    "peggy": {
+      "disabled": true,
+      "match": ["peggyjs", "peg", "pegjs"]
+    },
+    "regex": {
+      "disabled": true,
+      "match": ["regular expression", "regexp"]
+    },
+    "task": {
+      "match": ["tarea"]
+    },
+    "filter": {
+      "match": ["filtro", "filtra"]
+    },
+    "worklog": {
+      "match": ["parte", "trabajo"]
+    }
+  }
 }

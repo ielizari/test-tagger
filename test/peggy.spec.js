@@ -852,4 +852,30 @@ describe('PEGGY Test suite', () => {
     });
 
   });
+
+  describe('Automatic test tagging', () => {
+    it.only('detects simple automatic tag in nested test', () => {
+      const config = {
+        autotag: {
+          mytag: {}
+        }
+      }
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop1: 1,
+            // prop2: 2,
+            prop2: 5, // a comment
+          }
+          it('second test example', () => {
+            console.log('mytag')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotag: config.autotag });
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+      expect(analyzed[0].nested[0].autoTags).toContain('mytag');
+    });
+  })
 });

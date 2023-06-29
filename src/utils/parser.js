@@ -1,8 +1,8 @@
 const path = require('path');
 const { readFile, listFiles } = require('./files.js');
 
-const parseFile = (fn, rootDir, filePath) => {
-  const absolutePath = path.resolve(rootDir, filePath);
+const parseFile = (fn, filePath) => {
+  const absolutePath = path.resolve(config.rootDir, filePath);
   const fileContent = readFile(absolutePath);
   return {
     file: absolutePath,
@@ -11,9 +11,9 @@ const parseFile = (fn, rootDir, filePath) => {
 }
 
 const parseFiles = async(fn) => {
-  const files = await listFiles(config);
+  const files = await listFiles();
   return files
-    .map((file) => parseFile(fn, config.rootDir, file))
+    .map((file) => parseFile(fn, file))
     .map((node) => mapNode(node.file, node.content))
     .flat(Number.POSITIVE_INFINITY);
 }
@@ -21,6 +21,8 @@ const parseFiles = async(fn) => {
 const mapNode = (file, content, parentTags) => {
   const result = content.map((item) => {
     let tags = item.codeTags?.tags || [];
+    let autotags = item.autoTags || [];
+    tags = tags.concat(autotags);
     if (Array.isArray(parentTags)) {
       tags = parentTags.concat(tags);
     }

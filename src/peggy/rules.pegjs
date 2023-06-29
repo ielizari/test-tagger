@@ -1,3 +1,36 @@
+{
+
+  const tags = getAutotagConfig();
+
+	function getAutotagConfig () {
+		if (typeof options.autotag !== 'object') return [];
+		return Object.entries(options.autotag)
+			.filter(([tag, tagConfig]) => {
+				return !tagConfig.disabled;
+			})
+			.map(([tag, tagConfig]) => {
+				return tagConfig.match ? [tag].concat(tagConfig.match) : [tag];
+			})
+			.flat(Number.POSITIVE_INFINITY);
+	}
+	function autotag(item) {
+		let testAutoTags = []
+		if(item.type === 'ignored') {
+			tags.forEach((tag) => {
+				if(item.content.includes(tag)){
+					testAutoTags.push(tag);
+				}
+			});
+		} else if (item.type === 'function call') {
+			tags.forEach((tag) => {
+				if(item.args.includes(tag) || item.name.includes(tag)) {
+					testAutoTags.push(tag);
+				}
+			});
+		}
+		return testAutoTags;
+	}
+}
 start = result:(testFnCall / ignored_content)* {
 	//return result
 	return result.filter((match) => match.type !== 'ignored');
@@ -5,19 +38,25 @@ start = result:(testFnCall / ignored_content)* {
 
 testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? _ {
 	let nested = [];
+	const flatResults = testFn.flat(Number.POSITIVE_INFINITY);
+	const autoTags = flatResults.reduce((total, current) => {
+		return total.concat(autotag(current));
+	},[]);
 	if(Array.isArray(testFn)) {
-		nested = testFn.flat(Number.POSITIVE_INFINITY).filter((match) => match.type && match.type === 'test');
+		nested = flatResults.filter((match) => match.type && match.type === 'test');
 	} else {
 		if (testFn.type && testFn.type === 'test') {
 			nested.push(testFn);
 		}
 	}
+    //nested=testFn.flat(Number.POSITIVE_INFINITY)
 	return {
 		type: 'test',
     name: fnName,
 		test: description,
     modifiers: modifiers,
     codeTags: tags,
+    autoTags: autoTags,
 		nested: nested,
 		location: location()
 	}
@@ -159,9 +198,9 @@ singleLineComment = _ "//" p:$([^\n]*) {return p }
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
 
 ignored_content =
-	p:comment { return { type: 'ignored', location: location(), content: p}; } /
-	p:expression { return { type: 'ignored', location: location(), content: p}; } /
-	p:variable { return { type: 'ignored', location: location(), content: p}; } /
-    p:function { return { type: 'ignored', location: location(), content: p}; } /
-	_ p:([^\n]+) _ { return { type: 'ignored', location: location(), content: p.join('') }; }
+	p:$comment { return { type: 'ignored', location: location(), content: p}; } /
+	p:$expression { return { type: 'ignored', location: location(), content: p}; } /
+	p:$variable { return { type: 'ignored', location: location(), content: p}; } /
+  p:$function { return { type: 'ignored', location: location(), content: p}; } /
+	p:$([^\n]+) _ { return { type: 'ignored', location: location(), content: p}; }
 _ = [ \t\r\n]* { return null; }
