@@ -18,16 +18,19 @@ const parseFiles = async(fn) => {
     .flat(Number.POSITIVE_INFINITY);
 }
 
-const mapNode = (file, content, parentTags) => {
+const mapNode = (file, content, parentTags, parentAutoTags) => {
   const result = content.map((item) => {
     let tags = item.codeTags?.tags || [];
     let autotags = item.autoTags || [];
-    tags = tags.concat(autotags);
     if (Array.isArray(parentTags)) {
       tags = parentTags.concat(tags);
     }
+    if(Array.isArray(parentAutoTags)) {
+      autotags = parentAutoTags.concat(autotags).filter((tag, index, array) => array.indexOf(tag) === index);
+    }
     item.codeTags = tags;
-    item.nested = item.nested?.length ? mapNode(file, item.nested, tags) : [];
+    item.autoTags = autotags;
+    item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags) : [];
     item.nestedItemsCount = item.nested.reduce((total, test) => {
       return {
         items: total.items + test.nestedItemsCount.items + 1,
@@ -49,15 +52,29 @@ const treeDTO = (test, file) => {
       return modifier.type;
     }
     return modifier;
-  })
+  });
+
+  const mergedTags = mapTag(tags).concat(mapTag(test.autoTags, true));
 
   return {
     ...test,
+    tags: mergedTags,
     codeTags: tags,
     modifiers: modifiers,
     itemCount: test.nestedItemsCount,
     file,
   }
+}
+
+const mapTag = (tagList, autotag = false) => {
+  if(!Array.isArray(tagList)) return [];
+  return tagList.map((tag) => {
+    if(typeof tag === 'object') return tag;
+    return {
+      name: tag,
+      auto: autotag,
+    }
+  })
 }
 
 module.exports = {

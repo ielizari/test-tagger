@@ -30,6 +30,7 @@ describe('PEGGY Test suite', () => {
       name: 'describe',
       test: 'Test example',
       modifiers: [],
+      autoTags: [],
       codeTags: {
         tags: [
           'pdp',
@@ -44,6 +45,7 @@ describe('PEGGY Test suite', () => {
         name: 'it',
         test: 'nested it test',
         modifiers: [],
+        autoTags: [],
         codeTags: {
           tags_device: ['mobile']
         },
@@ -513,7 +515,6 @@ describe('PEGGY Test suite', () => {
         });
         `;
       const analyzed = peggyParser.parse(input.trim());
-      console.log(analyzed)
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
@@ -854,11 +855,11 @@ describe('PEGGY Test suite', () => {
   });
 
   describe('Automatic test tagging', () => {
-    it.only('detects simple automatic tag in nested test', () => {
+    it('detects automatic tag when provided as string', () => {
       const config = {
-        autotag: {
-          mytag: {}
-        }
+        autotags: [
+          'mytag'
+        ]
       }
       const input = `
         describe('Test example with curly', ()=>{
@@ -872,10 +873,124 @@ describe('PEGGY Test suite', () => {
           })
         });
         `;
-      const analyzed = peggyParser.parse(input.trim(), { autotag: config.autotag });
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('second test example');
       expect(analyzed[0].nested[0].autoTags).toContain('mytag');
+    });
+
+    it('detects automatic tag when provided as object', () => {
+      const config = {
+        autotags: [
+          {
+            tag: 'mytag',
+          }
+        ]
+      }
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop1: 1,
+            // prop2: 2,
+            prop2: 5, // a comment
+          }
+          it('second test example', () => {
+            console.log('mytag')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+      expect(analyzed[0].nested[0].autoTags).toContain('mytag');
+    });
+
+    it('ignores autotag if it is disabled', () => {
+      const config = {
+        autotags: [
+          {
+            tag: 'mytag',
+            disabled: true
+          }
+        ]
+      }
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop1: 1,
+            // prop2: 2,
+            prop2: 5, // a comment
+          }
+          it('second test example', () => {
+            console.log('mytag')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+      expect(analyzed[0].nested[0].autoTags).toHaveLength(0);
+    });
+
+    it('detects autotag if on of the matches in config array is found', () => {
+      const config = {
+        autotags: [
+          {
+            tag: 'mytag',
+            disabled: false,
+            match: ['similar', 'anothertag']
+          }
+        ]
+      }
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop1: 1,
+            // prop2: 2,
+            prop2: 5, // a comment
+          }
+          it('second test example', () => {
+            console.log('anothertag')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+      expect(analyzed[0].nested[0].autoTags).toContain('mytag');
+    });
+
+    it('detects autotag and docblock tag in the same test', () => {
+      const config = {
+        autotags: [
+          {
+            tag: 'mytag',
+            disabled: false,
+            match: ['similar', 'anothertag']
+          }
+        ]
+      }
+      const input = `
+        describe('Test example with curly', ()=>{
+          const obj = {
+            prop1: 1,
+            // prop2: 2,
+            prop2: 5, // a comment
+          }
+
+          /**
+           * @tags manual-tag
+           */
+          it('second test example', () => {
+            console.log('mytag')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('second test example');
+      expect(analyzed[0].nested[0].autoTags).toContain('mytag');
+      expect(analyzed[0].nested[0].codeTags.tags).toContain('manual-tag');
     });
   })
 });

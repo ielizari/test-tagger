@@ -3,32 +3,65 @@
   const tags = getAutotagConfig();
 
 	function getAutotagConfig () {
-		if (typeof options.autotag !== 'object') return [];
-		return Object.entries(options.autotag)
-			.filter(([tag, tagConfig]) => {
-				return !tagConfig.disabled;
+		if (!Array.isArray(options.autotags)) return [];
+		return options.autotags
+			.filter((tag) => {
+				return !tag.disabled;
 			})
-			.map(([tag, tagConfig]) => {
-				return tagConfig.match ? [tag].concat(tagConfig.match) : [tag];
+			.map((tag) => {
+				if(typeof tag === 'string') return [tag.toLowerCase()];
+				return tag.match ? [tag.tag].concat(tag.match).map(item => item.toLowerCase()) : [tag.tag.toLowerCase()];
 			})
-			.flat(Number.POSITIVE_INFINITY);
+			//.flat(Number.POSITIVE_INFINITY);
 	}
-	function autotag(item) {
-		let testAutoTags = []
-		if(item.type === 'ignored') {
-			tags.forEach((tag) => {
-				if(item.content.includes(tag)){
-					testAutoTags.push(tag);
-				}
-			});
-		} else if (item.type === 'function call') {
-			tags.forEach((tag) => {
-				if(item.args.includes(tag) || item.name.includes(tag)) {
-					testAutoTags.push(tag);
+	function autotag(item, testDescription) {
+		let testAutoTags = [];
+		if (testDescription) {
+			tags.forEach((tagList) => {
+				const match = matchesTag(tagList, testDescription);
+				if(match) {
+					testAutoTags.push(match);
 				}
 			});
 		}
+		if(item.type === 'ignored') {
+			tags.forEach((tagList) => {
+				const match = matchesTag(tagList, item.content)
+				if(match){
+					testAutoTags.push(match);
+				}
+			});
+		} else if (item.type === 'function call') {
+			tags.forEach((tagList) => {
+				const argMatch = matchesTag(tagList, item.args);
+				const nameMatch = matchesTag(tagList, item.name);
+				if(argMatch || nameMatch) {
+					testAutoTags.push(tagList[0]);
+				}
+			});
+		} else if (item.type === 'test') {
+			// tags.forEach((tagList) => {
+			// 	const match = matchesTag(tagList, item.test);
+			// 	if(match) {
+			// 		testAutoTags.push(match);
+			// 	}
+			// });
+		}
 		return testAutoTags;
+	}
+
+	function matchesTag(tagList, content) {
+		let cont;
+		if(typeof content === 'string') {
+			cont = content.toLowerCase();
+		} else if(Array.isArray(content)) {
+			cont = content.map((item) => typeof item === 'string' ? item.toLowerCase() : item);
+		}
+		for (const tag of tagList) {
+			if (cont.includes(tag)) {
+				return tagList[0];
+			}
+		}
 	}
 }
 start = result:(testFnCall / ignored_content)* {
@@ -38,10 +71,12 @@ start = result:(testFnCall / ignored_content)* {
 
 testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? _ {
 	let nested = [];
-	const flatResults = testFn.flat(Number.POSITIVE_INFINITY);
+	const flatResults = Array.isArray(testFn) ? testFn.flat(Number.POSITIVE_INFINITY) : [];
 	const autoTags = flatResults.reduce((total, current) => {
-		return total.concat(autotag(current));
+		const tags = autotag(current, description)
+		return total.concat(tags).filter((tag, index, array) => array.indexOf(tag) === index);
 	},[]);
+
 	if(Array.isArray(testFn)) {
 		nested = flatResults.filter((match) => match.type && match.type === 'test');
 	} else {

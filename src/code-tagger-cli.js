@@ -24,7 +24,7 @@ function getConfig() {
 
 const parseFile = (file) => {
   return peggyParser.parse(file.trim(), {
-    autotag: config.autotag
+    autotags: config.autotags
   });
 }
 

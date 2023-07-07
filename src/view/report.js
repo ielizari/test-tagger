@@ -38,13 +38,16 @@ window.onload = () => {
     return false;
   };
 
-  const tagFieldFormatter = (cell, formatterParams, onRendered) => {
+  const createTagNode = (cell, isTag = true) => {
     const cellContainer = document.createElement('div');
     cellContainer.classList = 'tag-container';
     const nodes = cell.getValue().map((tag) => {
       const tagContainer = document.createElement('div');
-      const text = document.createTextNode(tag);
-      tagContainer.classList = 'tag';
+      const text = document.createTextNode(isTag ? tag.name : tag);
+      tagContainer.classList.add('tag');
+      if (tag.auto) {
+        tagContainer.classList.add('tag-auto');
+      }
       tagContainer.appendChild(text);
       return tagContainer;
     });
@@ -52,6 +55,14 @@ window.onload = () => {
       cellContainer.appendChild(node);
     });
     return cellContainer;
+  }
+
+  const tagFieldFormatter = (cell, formatterParams, onRendered) => {
+    return createTagNode(cell, true);
+  }
+
+  const modifiersFieldFormatter = (cell, formatterParams, onRendered) => {
+    return createTagNode(cell, false);
   }
 
   const descriptionMutator = (value, data, type, params, component) => {
@@ -71,10 +82,8 @@ window.onload = () => {
     groupBy: 'file',
     columns:[
     {title:"Description", field:"test", variableHeight: true, widthGrow:2, mutator: descriptionMutator},
-    //{title:"File", field:"file", hozAlign:"center", sorter:"date", width:150},
-    //{title:"Type", field:"name", responsive:0},
-    {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: tagFieldFormatter},
-    {title:"Tags", field:"codeTags", widthGrow:1, formatter: tagFieldFormatter},
+    {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: modifiersFieldFormatter},
+    {title:"Tags", field:"tags", widthGrow:1, formatter: tagFieldFormatter},
     ],
   });
 
