@@ -1,42 +1,56 @@
 window.onload = () => {
   const treeChildField = 'nested';
-  const compare = {
-    '=': function(a, b) { return a == b },
-    '<': function(a, b) { return a < b },
-    '<=': function(a, b) { return a <= b },
-    '>': function(a, b) { return a > b },
-    '>=': function(a, b) { return a >= b },
-    '!=': function(a, b) { return a != b },
-    'like': function(a, b) { return a.includes(b)}
-  };
+  const fields = ['test', 'file', 'modifiers', 'codeTags', 'autoTags'];
 
-  const checkFilter = (data, filter) => {
-    if (Array.isArray(filter)) {
-      return filter
-        .map((condition) => {
-          if(Array.isArray(data[condition.field])) {
-            return data[condition.field]
-              .map((item) => compare[condition.type](item, condition.value))
-              .reduce((result, current) => result || current, false)
-          }
-          return compare[condition.type](data[condition.field], condition.value);
-        })
-        .reduce((result, current) => result || current, false)
-    }
-    return compare[filter.type](data[filter.field], filter.value);
+  const isMatch = (data, words) => {
+    const matches = words.map((word) => {
+      for (const field of fieldsChecked) {
+        if (data[field].includes(word)) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    return filterCombination === 'OR' ? matches.some((match) => match) : matches.every((match) => match);
   }
 
-  const filterTree = function (data, filter) {
-    if(!filter || (!Array.isArray(filter) && !filter.value)) return true;
-    if(checkFilter(data, filter)) return true;
+  const filterTree = function (data, words) {
+    if(!words || (Array.isArray(words) && !words.length)) return true;
+
+    if(isMatch(data, words)) return true;
     if (data[treeChildField] && data[treeChildField].length > 0) {
-      for (const i in data[treeChildField]) {
-        const childOK = filterTree(data[treeChildField][i], filter);
+      for (let i=0; i< data[treeChildField].length; i++) {
+        const childOK = filterTree(data[treeChildField][i], words);
         if(childOK) return true;
       }
     }
     return false;
   };
+
+
+  const createFieldFilters = () => {
+    const fieldsContainer = document.getElementById('filterFields');
+    // const columns = Object.values(table.getColumns()).map((col) => {
+    //   const { title, field } = col._column.definition;
+    //   return { title, field };
+    // });
+    fieldsFilterElements = [];
+    fields.forEach((fieldName) => {
+      const container = document.createElement('label');
+      const checkbox = document.createElement('input');
+      const labelText = document.createTextNode(fieldName);
+      checkbox.type = 'checkbox';
+      checkbox.id = 'field_filter_' + fieldName;
+      checkbox.value = fieldName;
+      checkbox.name = 'fieldsFilter';
+      checkbox.checked = true;
+      fieldsFilterElements.push(checkbox);
+      container.appendChild(checkbox);
+      container.appendChild(labelText);
+      fieldsContainer.appendChild(container);
+    });
+  }
 
   const createTagNode = (cell, isTag = true) => {
     const cellContainer = document.createElement('div');
@@ -89,58 +103,39 @@ window.onload = () => {
 
 
   let filterForm;
-  let fieldsFilterBtn;
-  let fieldsFilterDropdown;
   let fieldsFilterApply;
+  let fieldsContainer;
+  let fieldsFilterElements;
+  let fieldsChecked;
   let filterInput;
+  let filterCombination;
 
   table.on("tableBuilt", () => {
     initControls();
-    const columns = Object.values(table.getColumns()).map((col) => {
-      const { title, field } = col._column.definition;
-      return { title, field };
-    });
-
-    columns.forEach((column) => {
-      const option = document.createElement('div');
-      const checkbox = document.createElement('checkbox');
-      const label = document.createAttribute('label');
-      option.appendChild(checkbox, label);
-      fieldsFilterDropdown.appendChild(option)
-      //filterFields.options[filterFields.options.length] = new Option(column.title, column.field);
-    });
   });
 
   function initControls () {
     filterForm = document.getElementById('filter-form');
     fieldsFilterDropdown = document.getElementById('filter-fields-dropdown');
 
-    fieldsFilterBtn = document.getElementById('filter-fields-control');
-    fieldsFilterBtn.addEventListener('click', () => {
-      if (fieldsFilterDropdown.classList.contains('hidden')) {
-        fieldsFilterDropdown.classList.remove('hidden');
-      } else {
-        fieldsFilterDropdown.classList.add('hidden');
-      }
-    });
+    fieldsContainer = document.getElementById('filterFields');
+    createFieldFilters();
 
     filterInput = document.getElementById('filter-input');
 
     fieldsFilterApply = document.getElementById('filter-apply');
-    //fieldsFilterApply.addEventListener('click', () => {
     filterForm.addEventListener('submit', (event) => {
       event.preventDefault();
       const filterText = filterInput.value;
       table.clearFilter();
       if(!filterText) return;
 
-      const filters = filterText
-        .split(' ')
-        .map((word) => {
-          return ['test', 'file', 'modifiers', 'codeTags']
-            .map((field) => { return {field:field, type:"like", value: word}})
-        })
-        .flat(Number.POSITIVE_INFINITY);
+      filterCombination = document.querySelector('input[name="filterCombination"]:checked').value;
+
+      const filters = filterText.split(' ');
+      fieldsChecked = [...fieldsContainer.querySelectorAll('input[name=fieldsFilter]:checked')]
+        .map((node) => node.value);
+
       table.setFilter(filterTree, filters)
     });
   }

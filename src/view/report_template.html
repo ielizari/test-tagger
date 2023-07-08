@@ -8,7 +8,17 @@
   <body>
     <div id="table-filters">
       <form id="filter-form">
-        <button id="filter-fields-control">Todos</button>
+        <div id="filterFields"></div>
+        <div class="filterCombinationContainer">
+          <label for="filterOR">
+            <input type="radio" id="filterOR" name="filterCombination" value="OR" checked />
+            OR
+          </label>
+          <label for="filterAND">
+            <input type="radio" id="filterAND" name="filterCombination" value="AND" />
+            AND
+          </label>
+        </div>
         <div id="filter-fields-dropdown" class="multiselect__dropdown hidden"></div>
         <input id="filter-input" type="text" />
         <button id="filter-apply" type="submit">Filter</button>
