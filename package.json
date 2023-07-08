@@ -10,14 +10,16 @@
     "app": "node src/code-tagger-cli.js",
     "test": "jest",
     "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs",
-    "build": "rm -rf .dist && mkdir .dist && npm pack && mv code-tagger-* .dist"
+    "build": "rm -rf .dist && mkdir .dist && npm pack && mv code-tagger-* .dist",
+    "prepare": "husky install"
   },
   "author": "Iñaki Elizari Reta",
   "license": "MIT",
   "devDependencies": {
     "@jest/globals": "^29.5.0",
     "@types/node": "^14.11.2",
-    "jest": "^29.5.0"
+    "jest": "^29.5.0",
+    "husky": "^8.0.0"
   },
   "dependencies": {
     "glob": "^10.2.7",
