@@ -3,7 +3,8 @@ const { readFile, writeFile, jsonString } = require('./files.js');
 const createReport = (data) => {
   let template = readFile('../view/report_template.html', __dirname);
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
-  const dataString = '<script type="text/javascript">const reportData=' + jsonString(data) + '</script>';
+  const jsonData = jsonString(data);
+  const dataString = '<script type="text/javascript">const reportData=' + jsonData + '</script>';
   const cssString = getReportCss(readFile('../view/styles.css', __dirname));
   const jsString = getReportScript(readFile('../view/report.js', __dirname));
   template = template
@@ -11,7 +12,7 @@ const createReport = (data) => {
     .replace(/###js###/, jsString)
     .replace(/###data###/, dataString);
 
-  writeFile(`${outDir}data.json`, dataString);
+  writeFile(`${outDir}data.json`, jsonData);
   writeFile(`${outDir}index.html`, template);
 }
 

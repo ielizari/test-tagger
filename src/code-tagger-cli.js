@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
 const regexParse = require('./regex/parser');
 const peggyParser = require('./peggy').parser;
 const { parseFiles } = require('./utils/parser');
@@ -6,16 +8,18 @@ const { createReport } = require('./utils/report');
 const { getFilePath } = require('./utils/files');
 
 global.debug = false;
-global.config = getConfig();
 
-const [,, ...args] = process.argv;
-if(args.includes('--debug')) {
+
+const argv = yargs(hideBin(process.argv)).argv
+if (argv.debug) {
   global.debug = true;
 }
+global.config = getConfig(argv.config);
 
-function getConfig() {
+function getConfig(path) {
   const defaultConfig = require('./config/default.json');
-  const hostConfig = require(getFilePath('.codetag.json'));
+  const hostConfigPath = path ? path : '.codetag.json';
+  const hostConfig = require(getFilePath(hostConfigPath));
   return {
     ...defaultConfig,
     ...hostConfig,
