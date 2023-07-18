@@ -1,6 +1,6 @@
 window.onload = () => {
   const treeChildField = 'nested';
-  const fields = ['test', 'file', 'modifiers', 'codeTags', 'autoTags'];
+  const fields = ['test', 'file', 'modifiers', 'codeTags'];
 
   const isMatch = (data, words) => {
     const matches = words.map((word) => {
@@ -56,6 +56,9 @@ window.onload = () => {
     const cellContainer = document.createElement('div');
     cellContainer.classList = 'tag-container';
     const nodes = cell.getValue().map((tag) => {
+      if (tag.auto && filterAutotags && !filterAutotags.checked) {
+        return;
+      }
       const tagContainer = document.createElement('div');
       const text = document.createTextNode(isTag ? tag.name : tag);
       tagContainer.classList.add('tag');
@@ -64,7 +67,7 @@ window.onload = () => {
       }
       tagContainer.appendChild(text);
       return tagContainer;
-    });
+    }).filter((node) => node);
     nodes.forEach((node) => {
       cellContainer.appendChild(node);
     });
@@ -79,7 +82,9 @@ window.onload = () => {
     return createTagNode(cell, false);
   }
 
-  const descriptionMutator = (value, data, type, params, component) => {
+  const descriptionFormatter = (cell, formatterParams, onRendered) => {
+    const data = cell.getData();
+    const value = cell.getValue();
     return data.itemCount.items ? `${value} (${data.itemCount.items} items ${data.itemCount.tests} tests)` : value;
   }
 
@@ -95,7 +100,7 @@ window.onload = () => {
     history: true,
     groupBy: 'file',
     columns:[
-    {title:"Description", field:"test", variableHeight: true, widthGrow:2, mutator: descriptionMutator},
+    {title:"Description", field:"test", variableHeight: true, widthGrow:2, formatter: descriptionFormatter},
     {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: modifiersFieldFormatter},
     {title:"Tags", field:"tags", widthGrow:1, formatter: tagFieldFormatter},
     ],
@@ -109,6 +114,7 @@ window.onload = () => {
   let fieldsChecked;
   let filterInput;
   let filterCombination;
+  let filterAutotags;
 
   table.on("tableBuilt", () => {
     initControls();
@@ -122,6 +128,13 @@ window.onload = () => {
     createFieldFilters();
 
     filterInput = document.getElementById('filter-input');
+    filterInput.value = "";
+    filterAutotags = document.getElementById('enableAutotags');
+    filterAutotags.checked = true;
+
+    filterAutotags.addEventListener('change', (event) => {
+      table.replaceData(reportData)
+    })
 
     fieldsFilterApply = document.getElementById('filter-apply');
     filterForm.addEventListener('submit', (event) => {
@@ -135,6 +148,9 @@ window.onload = () => {
       const filters = filterText.split(' ');
       fieldsChecked = [...fieldsContainer.querySelectorAll('input[name=fieldsFilter]:checked')]
         .map((node) => node.value);
+      if (filterAutotags.checked) {
+        fieldsChecked = fieldsChecked.concat(['autoTags'])
+      }
 
       table.setFilter(filterTree, filters)
     });
