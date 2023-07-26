@@ -96,7 +96,7 @@ window.onload = () => {
     dataTreeChildField: treeChildField,
     layout: "fitColumns",
     pagination: "local",
-    paginationSize:25,
+    paginationSize:50,
     history: true,
     groupBy: 'file',
     columns:[
@@ -115,6 +115,8 @@ window.onload = () => {
   let filterInput;
   let filterCombination;
   let filterAutotags;
+  let filterAdvancedContainer;
+  let filterAdvancedBtn;
 
   table.on("tableBuilt", () => {
     initControls();
@@ -131,6 +133,12 @@ window.onload = () => {
     filterInput.value = "";
     filterAutotags = document.getElementById('enableAutotags');
     filterAutotags.checked = true;
+
+    filterAdvancedContainer = document.getElementById('filter-advanced');
+    filterAdvancedBtn = document.getElementById('show-advanced-filters');
+    filterAdvancedBtn.addEventListener('click', (event) => {
+      filterAdvancedContainer.classList.toggle('hidden');
+    });
 
     filterAutotags.addEventListener('change', (event) => {
       table.replaceData(reportData)

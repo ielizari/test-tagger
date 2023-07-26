@@ -3,17 +3,25 @@ const { readFile, listFiles } = require('./files.js');
 
 const parseFile = (fn, filePath) => {
   const absolutePath = path.resolve(config.rootDir, filePath);
-  const fileContent = readFile(absolutePath);
+  const fileContent = fn(readFile(absolutePath));
+  return parsedFileDto(absolutePath, fileContent);
+}
+
+const parsedFileDto = (filePath, fileContent) => {
   return {
-    file: absolutePath,
-    content:  fn(fileContent)
+    file: filePath,
+    content:  fileContent
   };
 }
 
 const parseFiles = async(fn) => {
   const files = await listFiles();
   return files
-    .map((file) => parseFile(fn, file))
+    .map((file) => parseFile(fn, file));
+}
+
+const mapFiles = (files) => {
+  return files
     .map((node) => mapNode(node.file, node.content))
     .flat(Number.POSITIVE_INFINITY);
 }
@@ -31,10 +39,10 @@ const mapNode = (file, content, parentTags, parentAutoTags) => {
     item.codeTags = tags;
     item.autoTags = autotags;
     item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags) : [];
-    item.nestedItemsCount = item.nested.reduce((total, test) => {
+    item.itemCount = item.nested.reduce((total, test) => {
       return {
-        items: total.items + test.nestedItemsCount.items + 1,
-        tests: test.type === 'test' && ['it', 'test'].includes(test.name) ? total.tests + test.nestedItemsCount.tests + 1 : total.tests + test.nestedItemsCount.tests,
+        items: total.items + test.itemCount.items + 1,
+        tests: test.type === 'test' && ['it', 'test'].includes(test.name) ? total.tests + test.itemCount.tests + 1 : total.tests + test.itemCount.tests,
       }
     }, { items: 0, tests: 0 });
     return treeDTO(item, file);
@@ -61,7 +69,6 @@ const treeDTO = (test, file) => {
     tags: mergedTags,
     codeTags: tags,
     modifiers: modifiers,
-    itemCount: test.nestedItemsCount,
     file,
   }
 }
@@ -79,4 +86,6 @@ const mapTag = (tagList, autotag = false) => {
 
 module.exports = {
   parseFiles,
+  parsedFileDto,
+  mapFiles,
 }

@@ -2,19 +2,23 @@
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const regexParse = require('./regex/parser');
-const peggyParser = require('./peggy').parser;
-const { parseFiles } = require('./utils/parser');
+const { parseFile: peggyParser } = require('./peggy');
 const { createReport } = require('./utils/report');
+const { parseFiles, mapFiles } = require('./utils/parser');
 const { getFilePath } = require('./utils/files');
 
 global.debug = false;
-
+console.time('Execution time');
 
 const argv = yargs(hideBin(process.argv)).argv
 if (argv.debug) {
   global.debug = true;
 }
 global.config = getConfig(argv.config);
+
+if (argv.dryrun) {
+  global.dryrun = true;
+}
 
 function getConfig(path) {
   const defaultConfig = require('./config/default.json');
@@ -26,17 +30,17 @@ function getConfig(path) {
   };
 }
 
-const parseFile = (file) => {
-  return peggyParser.parse(file.trim(), {
-    autotags: config.autotags
-  });
-}
+parseFiles(peggyParser)
+  .then((parsedFiles) => {
+    const mappedFiles = mapFiles(parsedFiles);
+    createReport(mappedFiles, global.dryrun);
 
-parseFiles(parseFile).then(
-  (files) => {
-    createReport(files);
-  },
-  (error) => {
-    console.log('Error', error)
-  }
-);
+    const fileCount = mappedFiles.length;
+    const testCount = mappedFiles.reduce((total, currentFile) => {
+      return total + currentFile.itemCount.tests;
+    }, 0);
+    console.log(`Parsed ${testCount} tests in ${fileCount} files`);
+  })
+  .finally(() => {
+    console.timeEnd('Execution time');
+  });

@@ -2,36 +2,43 @@
 <html>
   <head>
     <title>Test report - Code Tagger</title>
-    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
+    ###tabulator_css###
     ###css###
   </head>
   <body>
+    <h1>Test report</h1>
+    <div class="timestamp">###timestamp###</div>
     <div id="table-filters">
       <form id="filter-form">
         <div>
-          <label for="enableAutotags">
-            <input id="enableAutotags" name="enableAutotags" type="checkbox" checked />
-            Enable Autotags
-          </label>
+          <input id="filter-input" type="text" />
+          <button id="filter-apply" type="submit">Filter</button>
         </div>
-        <div id="filterFields"></div>
-        <div class="filterCombinationContainer">
+        <div>
           <label for="filterOR">
             <input type="radio" id="filterOR" name="filterCombination" value="OR" checked />
-            OR
+            Any
           </label>
           <label for="filterAND">
             <input type="radio" id="filterAND" name="filterCombination" value="AND" />
-            AND
+            All
           </label>
+          <button id="show-advanced-filters" class="link">Advanced filters</button>
         </div>
-        <div id="filter-fields-dropdown" class="multiselect__dropdown hidden"></div>
-        <input id="filter-input" type="text" />
-        <button id="filter-apply" type="submit">Filter</button>
+        <div id="filter-advanced" class="hidden">
+          <label class="advanced-label" for="enableAutotags">
+            Enable Autotags
+          </label>
+          <div class="advanced-content">
+            <input id="enableAutotags" name="enableAutotags" type="checkbox" checked />
+          </div>
+          <label class="advanced-label">Target fields</label>
+          <div id="filterFields" class="advanced-content"></div>
+        </div>
       </form>
     </div>
     <div id="data-table"></div>
-    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    ###tabulator_script###
     ###data###
     ###js###
   </body>
