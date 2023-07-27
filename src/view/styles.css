@@ -111,3 +111,15 @@ input[type=text] {
 .advanced-content {
   grid-column: 2;
 }
+
+.summary__container {
+  display: grid;
+  grid-template-columns: min-content min-content;
+  grid-template-rows: auto;
+  grid-gap: 0.5rem 1rem;
+  padding: 1rem;
+}
+
+.summary__container > div {
+  white-space: nowrap;
+}

@@ -2,12 +2,22 @@
 <html>
   <head>
     <title>Test report - Code Tagger</title>
+    <meta charset="UTF-8">
     ###tabulator_css###
     ###css###
   </head>
   <body>
     <h1>Test report</h1>
-    <div class="timestamp">###timestamp###</div>
+    <div class="summary__container">
+      <div>Created</div>
+      <div>###timestamp###</div>
+      <div>File count</div>
+      <div id="summary-files"></div>
+      <div>Test count</div>
+      <div id="summary-test-count"></div>
+      <div>Skipped tests</div>
+      <div id="summary-skipped"></div>
+    </div>
     <div id="table-filters">
       <form id="filter-form">
         <div>

@@ -33,13 +33,9 @@ function getConfig(path) {
 parseFiles(peggyParser)
   .then((parsedFiles) => {
     const mappedFiles = mapFiles(parsedFiles);
-    createReport(mappedFiles, global.dryrun);
+    const { summary } = createReport(mappedFiles, global.dryrun);
 
-    const fileCount = mappedFiles.length;
-    const testCount = mappedFiles.reduce((total, currentFile) => {
-      return total + currentFile.itemCount.tests;
-    }, 0);
-    console.log(`Parsed ${testCount} tests in ${fileCount} files`);
+    console.log(`Parsed ${summary.testCount} tests in ${summary.fileCount} files`);
   })
   .finally(() => {
     console.timeEnd('Execution time');

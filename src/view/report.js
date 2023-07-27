@@ -117,12 +117,23 @@ window.onload = () => {
   let filterAutotags;
   let filterAdvancedContainer;
   let filterAdvancedBtn;
+  let summaryFiles;
+  let summaryTests;
+  let summarySkipped;
 
   table.on("tableBuilt", () => {
     initControls();
   });
 
   function initControls () {
+    const summary = getSummary(reportData)
+    summaryFiles = document.getElementById('summary-files');
+    summaryFiles.textContent = summary.fileCount;
+    summaryTests = document.getElementById('summary-test-count');
+    summaryTests.textContent = summary.testCount;
+    summarySkipped = document.getElementById('summary-skipped');
+    summarySkipped.textContent = summary.skipCount;
+
     filterForm = document.getElementById('filter-form');
     fieldsFilterDropdown = document.getElementById('filter-fields-dropdown');
 
@@ -162,6 +173,23 @@ window.onload = () => {
 
       table.setFilter(filterTree, filters)
     });
+  }
+
+  function getSummary (data) {
+    const fileCount = data.length;
+    let testCount = 0;
+    let skipCount = 0;
+
+    data.forEach((file) => {
+      testCount += file.itemCount.tests;
+      skipCount += file.itemCount.skipped;
+    });
+
+    return {
+      fileCount,
+      testCount,
+      skipCount,
+    }
   }
 }
 

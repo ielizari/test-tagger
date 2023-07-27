@@ -1,5 +1,7 @@
 const path = require('path');
 const { readFile, listFiles } = require('./files.js');
+const SKIP = 'skip';
+const INHERITED_SKIP = 'inherit_skip';
 
 const parseFile = (fn, filePath) => {
   const absolutePath = path.resolve(config.rootDir, filePath);
@@ -26,7 +28,11 @@ const mapFiles = (files) => {
     .flat(Number.POSITIVE_INFINITY);
 }
 
-const mapNode = (file, content, parentTags, parentAutoTags) => {
+const isTest = (test) => {
+  return test.type === 'test' && ['it', 'test'].includes(test.name);
+}
+
+const mapNode = (file, content, parentTags, parentAutoTags, skipped) => {
   const result = content.map((item) => {
     let tags = item.codeTags?.tags || [];
     let autotags = item.autoTags || [];
@@ -38,13 +44,16 @@ const mapNode = (file, content, parentTags, parentAutoTags) => {
     }
     item.codeTags = tags;
     item.autoTags = autotags;
-    item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags) : [];
+    item.skipped = skipped ? INHERITED_SKIP : item.modifiers.includes('skip') && SKIP;
+    item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags, item.skipped) : [];
     item.itemCount = item.nested.reduce((total, test) => {
+      const checkTest = isTest(test);
       return {
         items: total.items + test.itemCount.items + 1,
-        tests: test.type === 'test' && ['it', 'test'].includes(test.name) ? total.tests + test.itemCount.tests + 1 : total.tests + test.itemCount.tests,
+        tests: checkTest ? total.tests + test.itemCount.tests + 1 : total.tests + test.itemCount.tests,
+        skipped: total.skipped + test.itemCount.skipped + (checkTest && test.skipped ? 1 : 0),
       }
-    }, { items: 0, tests: 0 });
+    }, { items: 0, tests: 0, skipped: 0 });
     return treeDTO(item, file);
   });
   return result;

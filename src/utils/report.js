@@ -26,10 +26,28 @@ const createReport = (data, dryrun = false) => {
   return {
     data: jsonData,
     report: template,
+    summary: getSummary(data),
   }
 }
 
-const  getDateTime = () => {
+const getSummary = (data) => {
+  const fileCount = data.length;
+  let testCount = 0;
+  let skipCount = 0;
+
+  data.forEach((file) => {
+    testCount += file.itemCount.tests;
+    skipCount += file.itemCount.skipped;
+  });
+
+  return {
+    fileCount,
+    testCount,
+    skipCount,
+  }
+}
+
+const getDateTime = () => {
   const date = new Date();
   const year = date.getFullYear();
   const month = padNumber(date.getMonth()+1);
@@ -64,4 +82,5 @@ const getTabulatorScript = (content) => {
 
 module.exports = {
   createReport,
+  getSummary,
 }
