@@ -40,7 +40,7 @@ button.link {
   color: var(--secondary-color);
 }
 
-input[type=text] {
+input[type=text], select {
   padding: 0.5rem;
   border-width: 1px;
   border-style: solid;
@@ -110,12 +110,41 @@ input[type=text] {
 
 .summary__container {
   display: grid;
-  grid-template-columns: min-content min-content;
-  grid-template-rows: auto;
-  grid-gap: 0.5rem 1rem;
-  padding: 1rem;
+  grid-template-columns: repeat(8, min-content);
+  grid-template-rows: 1fr;
+  grid-gap: 0.5rem;
+  padding: 0.6rem;
+  background-color: #ffe396;
+  border: #424242 solid 1px;
+  justify-content: center;
 }
 
 .summary__container > div {
   white-space: nowrap;
+}
+
+.display-options {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+/* .display-options > label {
+  display: flex;
+  flex-direction: column;
+} */
+
+.display-options select {
+  margin-left: 0.3rem;
+}
+
+#filter-form {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
 }

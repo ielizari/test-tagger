@@ -852,6 +852,23 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('second test example');
     });
 
+     /**
+     * @tags nested timeout
+     */
+     it('detects nested tests containing timeout param', () => {
+      const input = `
+        describe('Test example with timeout', ()=>{
+          it('test example', () => {
+            console.log('testing')
+          },
+          2000)
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with timeout');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
+
   });
 
   describe('Automatic test tagging', () => {

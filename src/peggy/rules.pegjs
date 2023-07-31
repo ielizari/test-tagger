@@ -69,7 +69,7 @@ start = result:(testFnCall / ignored_content)* {
 	return result.filter((match) => match.type !== 'ignored');
 }
 
-testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ")" _ ";"? _ {
+testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ( _ "," _ variable _)? _ ")" _ ";"? _ {
 	let nested = [];
 	const flatResults = Array.isArray(testFn) ? testFn.flat(Number.POSITIVE_INFINITY) : [];
 	const autoTags = flatResults.reduce((total, current) => {
