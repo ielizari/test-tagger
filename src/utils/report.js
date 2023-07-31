@@ -9,11 +9,13 @@ const createReport = (data, dryrun = false) => {
   const jsString = getReportScript(readFile('../view/report.js', __dirname));
   const tabulatorScript = getTabulatorScript(readFile('dist/js/tabulator.min.js', 'node_modules/tabulator-tables'));
   const tabulatorCss = getTabulatorCss(readFile('dist/css/tabulator.min.css','node_modules/tabulator-tables'));
+  const reportConfig = getConfigScript();
   const timestamp = getDateTime();
   template = template
     .replace(/###timestamp###/, timestamp)
     .replace(/###css###/, cssString)
     .replace(/###js###/, jsString)
+    .replace(/###config###/, reportConfig)
     .replace(/###data###/, dataString)
     .replace(/###tabulator_script###/, tabulatorScript)
     .replace(/###tabulator_css###/, tabulatorCss);
@@ -71,6 +73,13 @@ const getReportScript = (content) => {
   return global.debug ?
     '<script type="text/javascript" src="../src/view/report.js"></script>' :
     '<script type="text/javascript">' + content + '</script>';
+}
+
+const getConfigScript = () => {
+  const reportCfg = {}
+  reportCfg.coverage = global.config.coverage;
+  reportCfg.autotags = global.config.autotags;
+  return '<script type="text/javascript">const reportCfg =' + jsonString(reportCfg) + ';</script>'
 }
 
 const getTabulatorCss = (content) => {

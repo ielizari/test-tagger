@@ -36,6 +36,20 @@
           <button id="show-advanced-filters" class="link">Advanced filters</button>
         </div>
         <div id="filter-advanced" class="hidden">
+          <label class="advanced-label" for="displaySelector">Display</label>
+          <div class="advanced-content">
+            <select id="displaySelector">
+              <option value="tree">Tree</option>
+              <option value="flat">Flat</option>
+            </select>
+          </div>
+          <label class="advanced-label" for="groupSelector">Group by</label>
+          <div class="advanced-content">
+            <select id="groupSelector">
+              <option value="file">File</option>
+              <option value="functionality">Functionality</option>
+            </select>
+          </div>
           <label class="advanced-label" for="enableAutotags">
             Enable Autotags
           </label>
@@ -50,6 +64,7 @@
     <div id="data-table"></div>
     ###tabulator_script###
     ###data###
+    ###config###
     ###js###
   </body>
 </html>

@@ -23,6 +23,48 @@
       "tag": "regex",
       "disabled": false,
       "match": ["regular expression", "regexp"]
+    },
+    {
+      "tag": "docblock",
+      "match": ["docblock", "dockblock"]
+    }
+  ],
+  "coverage": [
+    {
+      "label": "PEGGY",
+      "tags": ["peggy"],
+      "children": [
+        {
+          "label": "Javascript Syntax",
+          "tags": [["javascript"], ["syntax"]]
+        },
+        {
+          "label": "DocBlocks",
+          "tags": ["docblock"]
+        },
+        {
+          "label": "Autotags",
+          "tags": ["autotag"]
+        }
+      ]
+    },
+    {
+      "label": "REGEX",
+      "tags": ["regex"],
+      "children": [
+        {
+          "label": "Javascript Syntax",
+          "tags": [["javascript"], ["syntax"]]
+        },
+        {
+          "label": "DocBlocks",
+          "tags": ["docblock"]
+        },
+        {
+          "label": "Autotags",
+          "tags": ["autotag"]
+        }
+      ]
     }
   ]
 }
