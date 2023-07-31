@@ -6,6 +6,7 @@ window.onload = () => {
   let tableData;
   let currentGroupData = 'file';
   let currentDisplayData = 'tree';
+  let currentSkippedTestsData = 'all';
   let initializedControls = false;
   let filterForm;
   let fieldsFilterApply;
@@ -19,6 +20,7 @@ window.onload = () => {
   let filterAdvancedBtn;
   let filterDisplay;
   let filterGroup;
+  let filterTestSkipped;
   let summaryFiles;
   let summaryTests;
   let summarySkipped;
@@ -34,6 +36,12 @@ window.onload = () => {
     });
 
     return filterCombination === 'OR' ? matches.some((match) => match) : matches.every((match) => match);
+  }
+
+  const filterSkipped = (data) => {
+    if(currentSkippedTestsData === 'skipped' && !data.skipped) return false;
+    if(currentSkippedTestsData === 'not-skipped' && data.skipped) return false;
+    return true;
   }
 
   const filterTree = function (data, words) {
@@ -74,6 +82,7 @@ window.onload = () => {
   }
 
   const createTagNode = (cell, isTag = true) => {
+    const data = cell.getData();
     const cellContainer = document.createElement('div');
     cellContainer.classList = 'tag-container';
     const nodes = cell.getValue().map((tag) => {
@@ -81,12 +90,13 @@ window.onload = () => {
         return;
       }
       const tagContainer = document.createElement('div');
-      const text = document.createTextNode(isTag ? tag.name : tag);
+      const text = isTag ? tag.name : tag === 'skip' && data.skipped === 'inherit_skip' ? 'inherited skip' : tag;
+      const textNode = document.createTextNode(text);
       tagContainer.classList.add('tag');
       if (tag.auto) {
         tagContainer.classList.add('tag-auto');
       }
-      tagContainer.appendChild(text);
+      tagContainer.appendChild(textNode);
       return tagContainer;
     }).filter((node) => node);
     nodes.forEach((node) => {
@@ -178,28 +188,39 @@ window.onload = () => {
     filterGroup.addEventListener('change', (event) => {
       currentGroupData = event.target.value;
       renderTable();
-    })
+    });
+
+    filterTestSkipped = document.getElementById('testExecutionSelector');
+    filterTestSkipped.addEventListener('change', (event) => {
+      currentSkippedTestsData = event.target.value;
+      applyFilters();
+    });
 
     fieldsFilterApply = document.getElementById('filter-apply');
     filterForm.addEventListener('submit', (event) => {
       event.preventDefault();
-      const filterText = filterInput.value;
-      table.clearFilter();
-      if(!filterText) return;
-
-      filterCombination = document.querySelector('input[name="filterCombination"]:checked').value;
-
-      const filters = filterText.split(' ');
-      fieldsChecked = [...fieldsContainer.querySelectorAll('input[name=fieldsFilter]:checked')]
-        .map((node) => node.value);
-      if (filterAutotags.checked) {
-        fieldsChecked = fieldsChecked.concat(['autoTags'])
-      }
-
-      table.setFilter(filterTree, filters)
+      applyFilters();
     });
 
     initializedControls = true;
+  }
+
+  function applyFilters () {
+    const filterText = filterInput.value;
+    table.clearFilter();
+    table.addFilter(filterSkipped);
+    if(!filterText) return;
+
+    filterCombination = document.querySelector('input[name="filterCombination"]:checked').value;
+
+    const filters = filterText.split(' ');
+    fieldsChecked = [...fieldsContainer.querySelectorAll('input[name=fieldsFilter]:checked')]
+      .map((node) => node.value);
+    if (filterAutotags.checked) {
+      fieldsChecked = fieldsChecked.concat(['autoTags'])
+    }
+
+    table.addFilter(filterTree, filters);
   }
 
   function getSummary (data) {

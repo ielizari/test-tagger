@@ -45,6 +45,7 @@ const mapNode = (file, content, parentTags, parentAutoTags, skipped) => {
     item.codeTags = tags;
     item.autoTags = autotags;
     item.skipped = skipped ? INHERITED_SKIP : item.modifiers.includes('skip') && SKIP;
+    if (item.skipped && !item.modifiers.includes('skip')) item.modifiers.push('skip')
     item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags, item.skipped) : [];
     item.itemCount = item.nested.reduce((total, test) => {
       const checkTest = isTest(test);
