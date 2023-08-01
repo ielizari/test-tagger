@@ -869,6 +869,25 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('test example');
     });
 
+    /**
+     * @tags nested import
+     */
+     it('detects nested tests when there is a comment followed by import full library', () => {
+      const input = `
+        // a comment
+        import '@my-library/lib'
+
+        describe('Test example with import', ()=>{
+          it('test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with import');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
+
   });
 
   describe('Automatic test tagging', () => {

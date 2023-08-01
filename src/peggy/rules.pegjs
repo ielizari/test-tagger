@@ -171,7 +171,7 @@ function =
 	standardFunction /
 	arrowFunction
 
-import = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })+  _ "}"? _ "from" _ string _ ";" _ {
+import = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })*  _ "}"? _ "from"? _ string _ ";"? _ {
 	return {
 		type: 'import',
 		names: i
