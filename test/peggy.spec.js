@@ -888,6 +888,28 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('test example');
     });
 
+    /**
+     * @tags nested class
+     */
+     it.only('detects nested tests when there is a class declaration', () => {
+      const input = `
+        // Coment
+        class myMockClass {
+          aProp = '';
+          // Comment on my method
+          aMethod = jest.fn();
+        }
+        describe('Test example with class', ()=>{
+          it('test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with class');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
+
   });
 
   describe('Automatic test tagging', () => {

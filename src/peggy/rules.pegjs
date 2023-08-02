@@ -228,7 +228,7 @@ comparison = _ operand _ comparisonOperator _ operand _
 
 regex = _ !singleLineComment "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
 comment = singleLineComment
-singleLineComment = _ "//" p:$([^\n]*) {return p }
+singleLineComment = _ "//" p:$([^\n]*) _ {return p }
 
 identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
 
