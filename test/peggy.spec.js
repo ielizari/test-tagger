@@ -891,7 +891,7 @@ describe('PEGGY Test suite', () => {
     /**
      * @tags nested class
      */
-     it.only('detects nested tests when there is a class declaration', () => {
+     it('detects nested tests when there is a class declaration', () => {
       const input = `
         // Coment
         class myMockClass {
