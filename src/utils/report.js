@@ -7,8 +7,8 @@ const createReport = (data, dryrun = false) => {
   const dataString = '<script type="text/javascript">const reportData=' + jsonData + '</script>';
   const cssString = getReportCss(readFile('../view/styles.css', __dirname));
   const jsString = getReportScript(readFile('../view/report.js', __dirname));
-  const tabulatorScript = getTabulatorScript(readFile('dist/js/tabulator.min.js', 'node_modules/tabulator-tables'));
-  const tabulatorCss = getTabulatorCss(readFile('dist/css/tabulator.min.css','node_modules/tabulator-tables'));
+  const tabulatorScript = getTabulatorScript(readFile('../../node_modules/tabulator-tables/dist/js/tabulator.min.js', __dirname));
+  const tabulatorCss = getTabulatorCss(readFile('../../node_modules/tabulator-tables/dist/css/tabulator.min.css', __dirname));
   const reportConfig = getConfigScript();
   const timestamp = getDateTime();
   template = template

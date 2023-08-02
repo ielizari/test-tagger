@@ -968,7 +968,7 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].autoTags).toHaveLength(0);
     });
 
-    it('detects autotag if on of the matches in config array is found', () => {
+    it('detects autotag if one of the matches in config array is found', () => {
       const config = {
         autotags: [
           {
