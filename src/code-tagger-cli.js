@@ -6,6 +6,8 @@ const { parseFile: peggyParser } = require('./peggy');
 const { createReport } = require('./utils/report');
 const { parseFiles, mapFiles } = require('./utils/parser');
 const { getFilePath } = require('./utils/files');
+const { nodeColors } = require('./utils/colors.js');
+const util = require('util');
 
 global.debug = false;
 console.time('Execution time');
@@ -32,10 +34,32 @@ function getConfig(path) {
 
 parseFiles(peggyParser)
   .then((parsedFiles) => {
-    const mappedFiles = mapFiles(parsedFiles);
-    const { summary } = createReport(mappedFiles, global.dryrun);
+    let errFiles = []
+    let preMappedFiles = [];
+    parsedFiles.forEach((file) => {
+      file.type === 'peggyError' ?
+        errFiles.push(file) :
+        preMappedFiles.push(file);
+    })
+    const mappedFiles = mapFiles(preMappedFiles);
+    const { summary } = createReport(mappedFiles, errFiles, global.dryrun);
 
-    console.log(`Parsed ${summary.testCount} tests in ${summary.fileCount} files`);
+    console.log(nodeColors('FgGreen'), `Parsed ${summary.testCount} tests in ${summary.fileCount} files`, nodeColors('FgWhite'));
+    errFiles.length && console.log(nodeColors('FgRed'), `\nExcluded ${errFiles.length} files`);
+    errFiles.forEach((file) => {
+      console.error(
+        'Error parsing file: ',
+        nodeColors('FgGreen'),
+        file.file + ':',
+        nodeColors('FgWhite'),
+        `Expected ${file.error.expected[1].type} of input or ${file.error.expected[0].description}`+
+        ` but ${util.inspect(file.error.found)} found at line ${file.error.location.start.line}, `+
+        `column ${file.error.location.start.column}.`
+      )
+    });
+    if(errFiles.length) {
+      console.error(nodeColors('FgWhite'), `Check ${process.cwd()}/${config.outputDir}/error.log for detailed information.\n`)
+    }
   })
   .finally(() => {
     console.timeEnd('Execution time');

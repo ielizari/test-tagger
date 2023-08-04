@@ -5,8 +5,16 @@ const INHERITED_SKIP = 'inherit_skip';
 
 const parseFile = (fn, filePath) => {
   const absolutePath = path.resolve(config.rootDir, filePath);
-  const fileContent = fn(readFile(absolutePath));
-  return parsedFileDto(absolutePath, fileContent);
+  try {
+    const fileContent = fn(readFile(absolutePath));
+    return parsedFileDto(absolutePath, fileContent);
+  } catch (err) {
+    return {
+      type: 'peggyError',
+      file: absolutePath,
+      error: err,
+    }
+  }
 }
 
 const parsedFileDto = (filePath, fileContent) => {

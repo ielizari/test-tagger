@@ -64,12 +64,12 @@
 		}
 	}
 }
-start = result:(testFnCall / ignored_content)* {
+start "entrypoint" = result:(testFnCall / ignored_content)* {
 	//return result
 	return result.filter((match) => match.type !== 'ignored');
 }
 
-testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ( _ "," _ variable _)? _ ")" _ ";"? _ {
+testFnCall "test function call" = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ( _ "," _ variable _)? _ ")" _ ";"? _ {
 	let nested = [];
 	const flatResults = Array.isArray(testFn) ? testFn.flat(Number.POSITIVE_INFINITY) : [];
 	const autoTags = flatResults.reduce((total, current) => {
@@ -97,42 +97,42 @@ testFnCall = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" 
 	}
 }
 
-testFnNames =
+testFnNames "test function names" =
 	"describe" /
 	"test" /
 	"it"
 
-testModifiers = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / unknownModifier) _ { return mod; }
-eachModifier = "each" _ "(" _ a:(Array / identifier / functionCall)? _ ")" { return { type: 'each', values: a }; }
-unknownModifier =  i:identifier { return { type: 'unknown', value: i }; }
+testModifiers "test modifiers" = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / unknownModifier) _ { return mod; }
+eachModifier "each modifier" = "each" _ "(" _ a:(Array / identifier / functionCall)? _ ")" { return { type: 'each', values: a }; }
+unknownModifier "unknown modifier" =  i:identifier { return { type: 'unknown', value: i }; }
 
-testDescription =
+testDescription "test description" =
 	string /
   identifier
 
-testFunction = standardFunction / arrowFunction
-standardFunction = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
-arrowFunction = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
-arrowFnArgs = _ "(" _ functionArgs? _ ")" _ / _ identifier _
-directBlock = _ block:(testFnCall / ignored_content) _ { return block; }
-curlyBlock = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+testFunction "test function" = standardFunction / arrowFunction
+standardFunction "standard function" = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+arrowFunction "arrow function" = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
+arrowFnArgs "arrow function args" = _ "(" _ functionArgs? _ ")" _ / _ identifier _
+directBlock "direct block" = _ block:(testFnCall / ignored_content) _ { return block; }
+curlyBlock "curly block" = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
-docblock = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
-code_tag = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
+docblock "docblock" = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
+code_tag "code tag" = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
 	const mTag = tag;
 	const mVal = value.join('').split(' ');
 	const result = { [mTag]: mVal };
 	return result;
 }
 
-functionArgs = _ args:(arg:fn_arg _ ","? _ { return arg; })* _ { return args; }
-fn_arg =
+functionArgs "function arguments" = _ args:(arg:fn_arg _ ","? _ { return arg; })* _ { return args; }
+fn_arg "function argument" =
 	function /
 	functionCall /
 	variable /
 	identifier _ "="_ variable
 
-expression =
+expression "expression" =
 	conditional /
 	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
   assignment /
@@ -141,7 +141,7 @@ expression =
   $delete /
   return
 
-assignment = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/$variable) _ ";"? _ {
+assignment "assignment" = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/$variable) _ ";"? _ {
 	return {
 		type: 'assignment',
 		name: i,
@@ -149,14 +149,14 @@ assignment = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(func
 	}
 }
 
-assignmentOperands =
+assignmentOperands "assignment operands" =
     "{" _ !"}"_ i:assignmentVariable+ _ "}" _ { return i} /
     "[" _ !"]"_ i:(assignmentVariable / _ "," _ )+ _ "]" _ { return i} /
 	assignmentVariable
 
-assignmentVariable = _ v:((identifier _ "." _)* i:$identifier _ ","?)+ _ { return v}
+assignmentVariable "variable assignment" = _ v:((identifier _ "." _)* i:$identifier _ ","?)+ _ { return v}
 
-functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
+functionCall "function call" = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
 	const nested = Array.isArray(args) ? args.filter(arg => arg).flat(Number.POSITIVE_INFINITY) : new Array(args);
 	const nestedTests = nested.filter(item => item?.type === 'test')
 	if (nestedTests.length) return nestedTests;
@@ -167,11 +167,11 @@ functionCall = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((iden
     }
 }
 
-function =
+function "function" =
 	standardFunction /
 	arrowFunction
 
-import = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })*  _ "}"? _ "from"? _ string _ ";"? _ {
+import "import" = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })*  _ "}"? _ "from"? _ string _ ";"? _ {
 	return {
 		type: 'import',
 		names: i
@@ -179,18 +179,18 @@ import = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })*  _ "}
 }
 
 
-conditional = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? _ ("else" _ conditionalContent)? _ {
+conditional "conditional" = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? _ ("else" _ conditionalContent)? _ {
 	return {
     	type: 'ignored',
     };
 }
-conditionalContent = _ ("(" _ (!")" notOperator? _ (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")")? _ conditionalBlock _
-conditionalBlock = _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _
+conditionalContent "conditional content" = _ ("(" _ (!")" notOperator? _ (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")")? _ conditionalBlock _
+conditionalBlock "conditional block" = _ "{" _ (!"}" (testFnCall/ignored_content) _ )* _ "}" _
 
-return = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? _
-delete = _ "delete" _ f:$(identifier v:$(_ "." _ identifier _)*) _ ";"? _
+return "return statement" = _ "return" _ (function / functionCall / comparison / variable)? _ ";"? _
+delete "delete statement" = _ "delete" _ f:$(identifier v:$(_ "." _ identifier _)*) _ ";"? _
 
-variable =
+variable "variable" =
 	Array /
 	Object /
 	identifier _ "?"? (_ "." _ identifier)* /
@@ -199,15 +199,15 @@ variable =
 	integer /
 	boolean
 
-Array = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
-Object =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
-ObjectKey = _ k:$(function / functionCall / identifier / string / Array / integer / ignored_content) _ { return k; }
-ObjectValue = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
+Array "array" = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
+Object "object" =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
+ObjectKey "object key" = _ k:$(function / functionCall / identifier / string / Array / integer / ignored_content) _ { return k; }
+ObjectValue "object value" = _ ":" _ v:(function/functionCall/$variable) _ { return v; }
 
-boolean = "true" / "false"
-float = integer? "." [0-9]+
-integer = "-"? [0-9]+
-string =
+boolean "boolean" = "true" / "false"
+float "float" = integer? "." [0-9]+
+integer "integer" = "-"? [0-9]+
+string "string" =
 	"\"\"" /
 	"''" /
     "``" /
@@ -216,26 +216,27 @@ string =
 	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; } /
     regex
 
-typeOperator = "typeof" / "instanceof"
-bitwiseOperator = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
-logicalOperator = "&&" / "||" / notOperator
-notOperator = "!"
-comparisonOperator = "===" / "!==" / "==" / "!=" / "<=" / "<" / ">=" / ">" / "??" / "?"
-spreadOperator = "..."
+typeOperator "type operator" = "typeof" / "instanceof"
+bitwiseOperator "bitwise operator" = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
+logicalOperator "logical operator" = "&&" / "||" / notOperator
+notOperator "not operator" = "!"
+comparisonOperator "comparison operator" = "===" / "!==" / "==" / "!=" / "<=" / "<" / ">=" / ">" / "??" / "?"
+spreadOperator "spread operator" = "..."
 
-operand = variable
-comparison = _ operand _ comparisonOperator _ operand _
+operand "operand - variable" = variable
+comparison "comparison" = _ operand _ comparisonOperator _ operand _
 
-regex = _ !singleLineComment "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
-comment = singleLineComment
+regex "regex" = _ !singleLineComment "/" text:$(!([^\\] "/") .)* l:([^\\]) "/" [igm]* _
+comment "single line comment" = singleLineComment
 singleLineComment = _ "//" p:$([^\n]*) _ {return p }
 
-identifier = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
+identifier "identifier" = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
 
-ignored_content =
+ignored_content "ignored content" =
 	p:$comment { return { type: 'ignored', location: location(), content: p}; } /
 	p:$expression { return { type: 'ignored', location: location(), content: p}; } /
 	p:$variable { return { type: 'ignored', location: location(), content: p}; } /
   p:$function { return { type: 'ignored', location: location(), content: p}; } /
 	p:$([^\n]+) _ { return { type: 'ignored', location: location(), content: p}; }
+
 _ = [ \t\r\n]* { return null; }

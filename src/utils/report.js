@@ -1,9 +1,10 @@
 const { readFile, writeFile, jsonString } = require('./files.js');
 
-const createReport = (data, dryrun = false) => {
+const createReport = (data, errFiles, dryrun = false) => {
   let template = readFile('../view/report_template.html', __dirname);
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
   const jsonData = jsonString(data);
+  const errJsonData = jsonString(errFiles);
   const dataString = '<script type="text/javascript">const reportData=' + jsonData + '</script>';
   const cssString = getReportCss(readFile('../view/styles.css', __dirname));
   const jsString = getReportScript(readFile('../view/report.js', __dirname));
@@ -22,6 +23,7 @@ const createReport = (data, dryrun = false) => {
 
   if (!dryrun) {
     writeFile(`${outDir}data.json`, jsonData);
+    writeFile(`${outDir}error.log`, errJsonData);
     writeFile(`${outDir}index.html`, template);
   }
 
