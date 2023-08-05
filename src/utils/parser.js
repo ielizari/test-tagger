@@ -6,7 +6,7 @@ const INHERITED_SKIP = 'inherit_skip';
 const parseFile = (fn, filePath) => {
   const absolutePath = path.resolve(config.rootDir, filePath);
   try {
-    const fileContent = fn(readFile(absolutePath));
+    const fileContent = fn(readFile(absolutePath), filePath);
     return parsedFileDto(absolutePath, fileContent);
   } catch (err) {
     return {
@@ -51,7 +51,7 @@ const mapNode = (file, content, parentTags, parentAutoTags, skipped) => {
       autotags = parentAutoTags.concat(autotags).filter((tag, index, array) => array.indexOf(tag) === index);
     }
     item.codeTags = tags;
-    item.autoTags = autotags;
+    item.autoTags = (autotags && autotags.filter((autoTag) => !tags.includes(autoTag))) || [];
     item.skipped = skipped ? INHERITED_SKIP : item.modifiers.includes('skip') && SKIP;
     if (item.skipped && !item.modifiers.includes('skip')) item.modifiers.push('skip')
     item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags, item.skipped) : [];

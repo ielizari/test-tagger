@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "glob": "^10.2.7",
+    "minimatch": "^9.0.3",
     "peggy": "^3.0.2",
     "tabulator-tables": "^5.5.0",
     "yargs": "^17.7.2"

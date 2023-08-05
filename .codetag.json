@@ -13,7 +13,10 @@
     {
       "tag": "peggy",
       "disabled": false,
-      "match": ["peggyjs", "peg", "pegjs"]
+      "match": ["peggyjs", "peg", "pegjs"],
+      "path": {
+        "include": ["**/prueba*"]
+      }
     },
     {
       "tag": "autotag",
