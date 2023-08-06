@@ -1,20 +1,25 @@
 {
-  "name": "code-tagger",
+  "name": "test-tag",
   "version": "0.1.0",
-  "description": "Utility for tagging code and automate report creation",
-  "main": "src/code-tagger-cli.js",
+  "description": "Utility for code tagging and automate report creation",
+  "homepage": "https://github.com/ielizari/test-tag",
+  "main": "src/test-tag-cli.js",
   "bin": {
-    "code-tagger": "src/code-tagger-cli.js"
+    "test-tag": "src/test-tag-cli.js"
   },
   "scripts": {
-    "app": "node src/code-tagger-cli.js",
-    "app:debug": "node src/code-tagger-cli.js --debug",
+    "app": "node src/test-tag-cli.js",
+    "app:debug": "node src/test-tag-cli.js --debug",
     "test": "jest",
     "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs",
-    "build": "rm -rf .dist && mkdir .dist && npm pack && mv code-tagger-* .dist",
+    "build": "rm -rf .dist && mkdir .dist && npm pack && mv test-tag-* .dist",
     "prepare": "husky install"
   },
   "author": "Iñaki Elizari Reta",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/ielizari/test-tag.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "@jest/globals": "^29.5.0",

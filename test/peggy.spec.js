@@ -891,7 +891,7 @@ describe('PEGGY Test suite', () => {
     /**
      * @tags nested class
      */
-     it.only('detects nested tests when there is a comment followed by an unknown syntax with curly braces', () => {
+     it('detects nested tests when there is a comment followed by an unknown syntax with curly braces', () => {
       const input = `
         // Comment
         a senseless<<js(]syntax {

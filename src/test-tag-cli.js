@@ -24,7 +24,7 @@ if (argv.dryrun) {
 
 function getConfig(path) {
   const defaultConfig = require('./config/default.json');
-  const hostConfigPath = path ? path : '.codetag.json';
+  const hostConfigPath = path ? path : '.testag.json';
   const hostConfig = require(getFilePath(hostConfigPath));
   return {
     ...defaultConfig,
