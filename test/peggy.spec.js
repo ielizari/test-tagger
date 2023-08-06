@@ -891,10 +891,10 @@ describe('PEGGY Test suite', () => {
     /**
      * @tags nested class
      */
-     it('detects nested tests when there is a class declaration', () => {
+     it.only('detects nested tests when there is a comment followed by an unknown syntax with curly braces', () => {
       const input = `
-        // Coment
-        class myMockClass {
+        // Comment
+        a senseless<<js(]syntax {
           aProp = '';
           // Comment on my method
           aMethod = jest.fn();

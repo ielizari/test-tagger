@@ -13,6 +13,7 @@ const parseFile = (fn, filePath) => {
       type: 'peggyError',
       file: absolutePath,
       error: err,
+      trace: err.stack,
     }
   }
 }
