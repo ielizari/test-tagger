@@ -1,24 +1,24 @@
 {
-  "name": "test-tag",
+  "name": "test-tagger",
   "version": "0.1.0",
   "description": "Utility for code tagging and automate report creation",
-  "homepage": "https://github.com/ielizari/test-tag",
-  "main": "src/test-tag-cli.js",
+  "homepage": "https://github.com/ielizari/test-tagger",
+  "main": "src/test-tagger-cli.js",
   "bin": {
-    "test-tag": "src/test-tag-cli.js"
+    "test-tagger": "src/test-tagger-cli.js"
   },
   "scripts": {
-    "app": "node src/test-tag-cli.js",
-    "app:debug": "node src/test-tag-cli.js --debug",
+    "app": "node src/test-tagger-cli.js",
+    "app:debug": "node src/test-tagger-cli.js --debug",
     "test": "jest",
     "build-peggy": "peggy -o .dist/parser.js -o .dist/peggyParser.js src/peggy/rules.pegjs",
-    "build": "rm -rf .dist && mkdir .dist && npm pack && mv test-tag-* .dist",
+    "build": "rm -rf .dist && mkdir .dist && npm pack && mv test-tagger-* .dist",
     "prepare": "husky install"
   },
   "author": "Iñaki Elizari Reta",
   "repository": {
     "type": "github",
-    "url": "https://github.com/ielizari/test-tag.git"
+    "url": "https://github.com/ielizari/test-tagger.git"
   },
   "license": "MIT",
   "devDependencies": {

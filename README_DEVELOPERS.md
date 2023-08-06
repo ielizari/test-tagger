@@ -1,18 +1,18 @@
-# test-tag for developers
+# test-tagger for developers
 ## 1. Installation
 Clone the project
 ```
-git clone git@github.com:ielizari/test-tag.git
+git clone git@github.com:ielizari/test-tagger.git
 ```
 Move inside the newly created folder
 ```
-cd test-tag
+cd test-tagger
 ```
 Install dependencies
 ```
 npm i
 ```
-Create test report of test-tag
+Create test report of test-tagger
 ```
 npm run app
 ```
@@ -27,30 +27,30 @@ Executing below command with the `--debug` argument allows us to modify the user
 
 ## 2. Install module in host project
 In order to test this library as a local npm module in a locally installed project, follow next steps
-### 2.1 Build test-tag as module
-In test-tag project folder, run next command in order to pack the project
+### 2.1 Build test-tagger as module
+In test-tagger project folder, run next command in order to pack the project
 ```
 npm run build
 ```
-A `.dist` folder must have been created in the project containing a `test-tag-<version>.tgz` file.
+A `.dist` folder must have been created in the project containing a `test-tagger-<version>.tgz` file.
 
 ### 2.2 Installation in host project
-Get the full path in your system to the tgz file created in previous step. This path must be in a format including forward slashes for directories. For exmple, in a Windows system the path `C:\projects\libs\test-tag\.dist\test-tag-0.1.0.tgz` should be formated as `/c/projects/libs/test-tag/.dist/test-tag-0.1.0.tgz`
+Get the full path in your system to the tgz file created in previous step. This path must be in a format including forward slashes for directories. For exmple, in a Windows system the path `C:\projects\libs\test-tagger\.dist\test-tagger-0.1.0.tgz` should be formated as `/c/projects/libs/test-tagger/.dist/test-tagger-0.1.0.tgz`
 
-Move to your host project where you want to try `test-tag` and run the next command to install `test-tag` from a local project
+Move to your host project where you want to try `test-tagger` and run the next command to install `test-tagger` from a local project
 ```
-npm i --save-dev /c/projects/libs/test-tag/.dist/test-tag-0.1.0.tgz
+npm i --save-dev /c/projects/libs/test-tagger/.dist/test-tagger-0.1.0.tgz
 ```
-Check `package.json` for an entry in `devDependencies` like this (exact path may vary depending on the folder where test-tag was cloned):
+Check `package.json` for an entry in `devDependencies` like this (exact path may vary depending on the folder where test-tagger was cloned):
 ```
- "test-tag": "file:../test-tag/.dist/test-tag-0.1.0.tgz",
+ "test-tagger": "file:../test-tagger/.dist/test-tagger-0.1.0.tgz",
 ```
 Add to the scripts section in `package.json` the next line:
 ```
 scripts: {
-  "testag": "test-tag"
+  "testag": "test-tagger"
 }
 ```
 Create a config file in the root folder of you host project `.testag.json`
 
-When a `.testag.json` file is present in the root folder of a project using `test-tag`, the included fields will overwrite the default config. The rest will be taken from default config.
+When a `.testag.json` file is present in the root folder of a project using `test-tagger`, the included fields will overwrite the default config. The rest will be taken from default config.
