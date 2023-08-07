@@ -8,8 +8,8 @@ const createReport = (data, errFiles, dryrun = false) => {
   const dataString = '<script type="text/javascript">const reportData=' + jsonData + '</script>';
   const cssString = getReportCss(readFile('../view/styles.css', __dirname));
   const jsString = getReportScript(readFile('../view/report.js', __dirname));
-  const tabulatorScript = getTabulatorScript(readFile('../../node_modules/tabulator-tables/dist/js/tabulator.min.js', __dirname));
-  const tabulatorCss = getTabulatorCss(readFile('../../node_modules/tabulator-tables/dist/css/tabulator.min.css', __dirname));
+  const tabulatorScript = getTabulatorScript();
+  const tabulatorCss = getTabulatorCss();
   const reportConfig = getConfigScript();
   const timestamp = getDateTime();
   template = template
@@ -84,11 +84,21 @@ const getConfigScript = () => {
   return '<script type="text/javascript">const reportCfg =' + jsonString(reportCfg) + ';</script>'
 }
 
-const getTabulatorCss = (content) => {
-  return '<style>' + content + '</style>';
+const getTabulatorCss = () => {
+  try {
+    const content = readFile('node_modules/tabulator-tables/dist/css/tabulator.min.css', process.cwd());
+    return '<style>' + content + '</style>';
+  } catch (e) {
+    return '<link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet"></link>'
+  }
 }
-const getTabulatorScript = (content) => {
-  return '<script type="text/javascript">' + content + '</script>';
+const getTabulatorScript = () => {
+  try {
+    const content = readFile('node_modules/tabulator-tables/dist/js/tabulator.min.js', process.cwd())
+    return '<script type="text/javascript">' + content + '</script>';
+  } catch (e) {
+    return '<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>';
+  }
 }
 
 module.exports = {
