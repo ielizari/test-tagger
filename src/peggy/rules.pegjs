@@ -56,6 +56,8 @@
 			cont = content.toLowerCase();
 		} else if(Array.isArray(content)) {
 			cont = content.map((item) => typeof item === 'string' ? item.toLowerCase() : item);
+		} else {
+			return false;
 		}
 		for (const tag of tagList) {
 			if (cont.includes(tag)) {
