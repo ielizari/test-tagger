@@ -179,18 +179,21 @@ window.onload = () => {
     });
 
     filterDisplay = document.getElementById('displaySelector');
+    filterDisplay.value = 'tree';
     filterDisplay.addEventListener('change', (event) => {
       currentDisplayData = event.target.value;
       renderTable();
     });
 
     filterGroup = document.getElementById('groupSelector');
+    filterGroup.value = 'file';
     filterGroup.addEventListener('change', (event) => {
       currentGroupData = event.target.value;
       renderTable();
     });
 
     filterTestSkipped = document.getElementById('testExecutionSelector');
+    filterTestSkipped.value = 'all';
     filterTestSkipped.addEventListener('change', (event) => {
       currentSkippedTestsData = event.target.value;
       applyFilters();
