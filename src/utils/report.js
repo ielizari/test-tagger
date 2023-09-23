@@ -23,7 +23,9 @@ const createReport = (data, errFiles, dryrun = false) => {
 
   if (!dryrun) {
     writeFile(`${outDir}data.json`, jsonData);
-    writeFile(`${outDir}error.log`, errJsonData);
+    if (errFiles?.length) {
+      writeFile(`${outDir}error.log`, errJsonData);
+    }
     writeFile(`${outDir}index.html`, template);
   }
 

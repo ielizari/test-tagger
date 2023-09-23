@@ -1,5 +1,7 @@
 .dist
+.husky
 node_modules
 report
 test
 jestc.config.js
+.testag.json
