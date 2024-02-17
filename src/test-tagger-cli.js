@@ -32,6 +32,16 @@ function getConfig(path) {
   };
 }
 
+function getErrorMessage(file) {
+  if (file.error.expected) {
+    return `Expected ${file.error?.expected?.[1]?.type} of input or ${file.error?.expected?.[0]?.description}`+
+    ` but ${util.inspect(file.error?.found)} found at line ${file.error?.location?.start?.line}, `+
+    `column ${file.error?.location?.start?.column}.`;
+  } else {
+    return file.trace;
+  }
+}
+
 parseFiles(peggyParser)
   .then((parsedFiles) => {
     let errFiles = []
@@ -52,9 +62,7 @@ parseFiles(peggyParser)
         nodeColors('FgGreen'),
         file.file + ':',
         nodeColors('FgWhite'),
-        `Expected ${file.error.expected[1].type} of input or ${file.error.expected[0].description}`+
-        ` but ${util.inspect(file.error.found)} found at line ${file.error.location.start.line}, `+
-        `column ${file.error.location.start.column}.`
+        getErrorMessage(file)
       )
     });
     if(errFiles.length) {

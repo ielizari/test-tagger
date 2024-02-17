@@ -1074,5 +1074,47 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('detects automatic tag when provided as string');
       expect(analyzed[0].nested[0].autoTags).toContain('autotag');
     });
-  })
+
+    it('detects autotag into a function call argument', () => {
+      const config = {
+        autotags: [
+          {
+            "tag": "autotag",
+          },
+        ]
+      }
+      const input = `
+        describe('Test example with function call as function argument', ()=>{
+          it('test example', () => {
+            expect(screen.getCompnent('autotag')).toBeInTheDocument();
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags});
+      expect(analyzed[0].test).toEqual('Test example with function call as function argument');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+      expect(analyzed[0].nested[0].autoTags).toContain('autotag');
+    });
+
+    it('detects autotag into a function call argument passed as a regular expression', () => {
+      const config = {
+        autotags: [
+          {
+            "tag": "autotag",
+          },
+        ]
+      }
+      const input = `
+        describe('Test example with function call as function argument', ()=>{
+          it('test example', () => {
+            expect(screen.getCompnent(/autotag/i)).toBeInTheDocument();
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags});
+      expect(analyzed[0].test).toEqual('Test example with function call as function argument');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+      expect(analyzed[0].nested[0].autoTags).toContain('autotag');
+    });
+  });
 });

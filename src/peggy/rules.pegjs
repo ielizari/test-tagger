@@ -50,6 +50,29 @@
 		return testAutoTags;
 	}
 
+	function isString (str) {
+		return 'string' === typeof str;
+	}
+	function stringMatch (str, match) {
+		return isString(str) && isString(match) && str.toLowerCase().includes(match.toLowerCase());
+	}
+
+	function arrayMatch (arr, match) {
+		if (!isString(match)) return false;
+		if(isString(arr)) {
+			return stringMatch(arr, match);
+		}	else if (Array.isArray(arr)) {
+			return arr.some((item) => {
+				if (!item) return false;
+				if (isString(item)) {
+					return item.includes(match);
+				} else if ('object' === typeof item) {
+					return Object.values(item).some(el => arrayMatch(el, match));
+				}
+			});
+		}
+	}
+
 	function matchesTag(tagList, content) {
 		let cont;
 		if(typeof content === 'string') {
@@ -57,11 +80,7 @@
 		} else if(Array.isArray(content)) {
 			cont = content.map((item) => typeof item === 'string' ? item.toLowerCase() : item);
 		}
-		for (const tag of tagList) {
-			if (Array.isArray(cont) && cont.some(c => c.includes(tag))) {
-				return tagList[0];
-			}
-		}
+		return tagList.some(tag => arrayMatch(cont, tag)) ? tagList[0] : undefined;
 	}
 }
 start "entrypoint" = result:(testFnCall / ignored_content)* {
@@ -221,7 +240,7 @@ string "string" =
 	"\"" _ text:$(!([^\\] "\"") .)* l:([^\\]) _ "\"" { return text+l; } /
 	"'" _ text:$(!([^\\] "'") .)* l:([^\\]) _ "'" { return text+l; } /
 	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; } /
-    regex
+  $regex
 
 typeOperator "type operator" = "typeof" / "instanceof"
 bitwiseOperator "bitwise operator" = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
