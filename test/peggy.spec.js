@@ -1050,5 +1050,29 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].autoTags).toContain('mytag');
       expect(analyzed[0].nested[0].codeTags.tags).toContain('manual-tag');
     });
+
+    it('detects automatic tag when it is part of a bigger string', () => {
+      const config = {
+        autotags: [
+          {
+            "tag": "autotag",
+          },
+        ]
+      }
+      const input = `
+        describe('Test example with curly', ()=>{
+
+          it('detects automatic tag when provided as string', () => {
+            var autotags == 1;
+            console.log('autotags included')
+          });
+        });
+        `;
+        //debugger;
+      const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
+      expect(analyzed[0].test).toEqual('Test example with curly');
+      expect(analyzed[0].nested[0].test).toEqual('detects automatic tag when provided as string');
+      expect(analyzed[0].nested[0].autoTags).toContain('autotag');
+    });
   })
 });

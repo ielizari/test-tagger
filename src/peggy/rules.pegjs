@@ -58,7 +58,7 @@
 			cont = content.map((item) => typeof item === 'string' ? item.toLowerCase() : item);
 		}
 		for (const tag of tagList) {
-			if (Array.isArray(cont) && cont.includes(tag)) {
+			if (Array.isArray(cont) && cont.some(c => c.includes(tag))) {
 				return tagList[0];
 			}
 		}
@@ -73,7 +73,7 @@ testFnCall "test function call" = tags:docblock? _ fnName:testFnNames _ modifier
 	let nested = [];
 	const flatResults = Array.isArray(testFn) ? testFn.flat(Number.POSITIVE_INFINITY) : [];
 	const autoTags = flatResults.reduce((total, current) => {
-		const tags = autotag(current, description)
+		const tags = autotag(current, description);
 		return total.concat(tags).filter((tag, index, array) => array.indexOf(tag) === index);
 	},[]);
 
@@ -111,7 +111,14 @@ testDescription "test description" =
   identifier
 
 testFunction "test function" = standardFunction / arrowFunction
-standardFunction "standard function" = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+standardFunction "standard function" = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(
+	conditional /
+	testFnCall /
+	functionCall /
+	function /
+	variable /
+	ignored_content
+	) _ { return block; })*  _ "}" _ { return blockFns; }
 arrowFunction "arrow function" = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
 arrowFnArgs "arrow function args" = _ "(" _ functionArgs? _ ")" _ / _ identifier _
 directBlock "direct block" = _ block:(testFnCall / ignored_content) _ { return block; }
