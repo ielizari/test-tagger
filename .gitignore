@@ -1,5 +1,5 @@
 node_modules
-build
-report
+/build
+/report
 .dist
 test/prueba.spec.js
