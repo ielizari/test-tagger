@@ -129,15 +129,18 @@ testDescription "test description" =
 	string /
   identifier
 
-testFunction "test function" = standardFunction / arrowFunction
-standardFunction "standard function" = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(!"}" block:(
+block "block" = !"}" block:(
 	conditional /
 	testFnCall /
 	functionCall /
 	function /
+	expression /
 	variable /
 	ignored_content
-	) _ { return block; })*  _ "}" _ { return blockFns; }
+	) _ { return block; }
+
+testFunction "test function" = standardFunction / arrowFunction
+standardFunction "standard function" = _ "async"? _ "function"? _ identifier? _ "(" _ functionArgs? _ ")" _ "{" _ blockFns:(block)*  _ "}" _ { return blockFns; }
 arrowFunction "arrow function" = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
 arrowFnArgs "arrow function args" = _ "(" _ functionArgs? _ ")" _ / _ identifier _
 directBlock "direct block" = _ block:(testFnCall / ignored_content) _ { return block; }
@@ -163,6 +166,7 @@ expression "expression" =
 	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
   assignment /
   functionCall /
+	loop /
 	import /
   $delete /
   return
@@ -204,7 +208,12 @@ import "import" = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; 
 	}
 }
 
+loop "loop" =
+	forOfLoop /
+	whileLoop
 
+forOfLoop "for of loop" = _ "for" _ "await"? _ "(" _  ("const" / "let" / "var") _ "of" _ (variable / functionCall) _ ")" _ block:("{" _ blockFns:(block)*  _ "}" _ { return blockFns; })? _
+whileLoop "while loop" = _ "while" _ conditionalContent _
 conditional "conditional" = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? _ ("else" _ conditionalContent)? _ {
 	return {
     	type: 'ignored',
