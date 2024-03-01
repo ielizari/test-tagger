@@ -129,7 +129,7 @@ testDescription "test description" =
 	string /
   identifier
 
-block "block" = !"}" block:(
+block "block" = _ !"}" block:(
 	conditional /
 	testFnCall /
 	functionCall /
@@ -212,7 +212,7 @@ loop "loop" =
 	forOfLoop /
 	whileLoop
 
-forOfLoop "for of loop" = _ "for" _ "await"? _ "(" _  ("const" / "let" / "var") _ "of" _ (variable / functionCall) _ ")" _ block:("{" _ blockFns:(block)*  _ "}" _ { return blockFns; })? _
+forOfLoop "for of loop" = _ "for" _ "await"? _ "(" _  ("const" / "let" / "var") _ (variable) _  "of" _ (variable / functionCall) _ ")" _ block:("{" _ blockFns:(block)*  _ "}" _ { return blockFns; })? _
 whileLoop "while loop" = _ "while" _ conditionalContent _
 conditional "conditional" = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? _ ("else" _ conditionalContent)? _ {
 	return {

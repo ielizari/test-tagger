@@ -948,6 +948,25 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('test example');
     });
 
+    it('detects tests when there is a for of loop', () => {
+      const input = `
+      describe('Test example with for...of loop', () => {
+
+        it('test example', async () => {
+          for await (const participant of participants) {
+            const linkType = await screen.findByText(participant.type);
+            expect(linkType).toBeInTheDocument();
+            for (const link of participant.links) {
+              const i = 0;
+            }
+          }
+        });
+      });
+      `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with for...of loop');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
   });
 
   describe('Automatic test tagging', () => {
