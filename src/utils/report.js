@@ -3,15 +3,23 @@ const { readFile, writeFile, jsonString } = require('./files.js');
 const createReport = (data, errFiles, dryrun = false) => {
   let template = readFile('../view/report_template.html', __dirname);
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
-  const jsonData = jsonString(data);
+  const timestamp = getDateTime();
+  const reportConfig = getConfigScript();
+  const finalData = {
+    created: timestamp,
+    config: global.config,
+    data: data,
+    error: errFiles,
+  }
+  const jsonFullData = jsonString(finalData);
+  const jsonData = jsonString(finalData.data);
   const errJsonData = jsonString(errFiles);
   const dataString = '<script type="text/javascript">const reportData=' + jsonData + '</script>';
   const cssString = getReportCss(readFile('../view/styles.css', __dirname));
   const jsString = getReportScript(readFile('../view/report.js', __dirname));
   const tabulatorScript = getTabulatorScript();
   const tabulatorCss = getTabulatorCss();
-  const reportConfig = getConfigScript();
-  const timestamp = getDateTime();
+
   template = template
     .replace(/###timestamp###/, timestamp)
     .replace(/###css###/, cssString)
@@ -22,7 +30,7 @@ const createReport = (data, errFiles, dryrun = false) => {
     .replace(/###tabulator_css###/, tabulatorCss);
 
   if (!dryrun) {
-    writeFile(`${outDir}data.json`, jsonData);
+    writeFile(`${outDir}data.json`, jsonFullData);
     if (errFiles?.length) {
       writeFile(`${outDir}error.log`, errJsonData);
     }

@@ -54,3 +54,10 @@ scripts: {
 Create a config file in the root folder of you host project `.testag.json`
 
 When a `.testag.json` file is present in the root folder of a project using `test-tagger`, the included fields will overwrite the default config. The rest will be taken from default config.
+
+## 3. Vue UI
+Run:
+```
+npm run ui-dev
+```
+In your browser go to http://localhost:51173/

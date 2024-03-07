@@ -1,17 +1,28 @@
 <template>
-  <ReportFilters />
-  <ReportTable />
+  <Layout>
+    <ReportList :reportData="reportData"/>
+  </Layout>
 </template>
 
 <script>
-import ReportTable from './components/Report/ReportTable.vue';
-import ReportFilters from './components/Report/ReportFilters.vue';
+import { ref } from 'vue';
+import Layout from './components/layout/Layout.vue';
+import ReportList from './components/Report/ReportList.vue';
+import data from '@report/data.json';
+
 export default {
   name: 'App',
   components: {
-    ReportTable,
-    ReportFilters
+    Layout,
+    ReportList,
   },
+  setup() {
+    const reportData = ref(data);
+
+    return {
+      reportData,
+    }
+  }
 }
 </script>
 

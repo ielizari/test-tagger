@@ -1,6 +1,9 @@
 <template>
   <label v-if="label" :for="id">{{ label }}
-    <select :id="id">
+    <select
+      :id="id"
+      v-model="selectedOption"
+      >
       <option
         v-for="option in options"
         :value="option.value"
@@ -12,6 +15,8 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
+
 export default {
   name: 'FormSelect',
   props: {
@@ -30,8 +35,16 @@ export default {
       default: ''
     }
   },
-  setup() {
+  emits: ['optionSelected'],
+  setup(props, { emit }) {
+    const selectedOption = ref(props.options?.[0]?.value);
 
+    watch(selectedOption, (newValue) => {
+      emit('optionSelected', newValue);
+    });
+    return {
+      selectedOption,
+    }
   }
 }
 </script>

@@ -21,5 +21,14 @@ export default defineConfig({
       '/src': path.resolve(process.cwd(), 'src'),
       '@report': path.resolve(process.cwd(), 'report'),
     }
+  },
+  css: {
+    preprocessorOptions: {
+      less: {
+        math: "always",
+        relativeUrls: true,
+        javascriptEnabled: true
+      },
+    },
   }
 })
