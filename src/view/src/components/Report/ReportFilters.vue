@@ -16,7 +16,7 @@
           :id="'textExecutionSelector'"
           :label="'Show tests'"
           :options="[
-            {label: 'All', value:'all'},
+            { label: 'All', value:'all'},
             { label: 'Skipped only', value: 'skipped'},
             { label: 'Not skipped', value: 'not-skipped'}
           ]"
@@ -39,7 +39,7 @@
         <div>
           <RadioGroup
             :groupName="'filterCombination'"
-            :options="radioOptions"
+            :options="filterCombination"
             @optionChecked="onFilterOptionChecked"
           />
           <button
@@ -98,12 +98,15 @@
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue';
+import { ref } from 'vue';
 import FormSelect from '../common/form/Select.vue';
 import FormTextInput from '../common/form/TextInput.vue';
 import RadioGroup from '../common/form/RadioGroup.vue';
 import FormCheckbox from '../common/form/Checkbox.vue';
 import { DISPLAY_TYPES, GROUP_BY_TYPES } from './reportTypes.js';
+import { useFiltersStore } from '@stores/filters.js';
+import { useReportStore } from '@stores/report.js';
+import { storeToRefs } from 'pinia';
 
 export default {
   name: 'ReportFilters',
@@ -113,22 +116,14 @@ export default {
     RadioGroup,
     FormCheckbox,
   },
-  props: {
-    config: {
-      type: Object,
-      required: true,
-    },
-    selectedDisplay: {
-      type: String,
-      required: false,
-      default: () => DISPLAY_TYPES.TREE,
-    }
-  },
-  emits: ['displayChange'],
-  setup(props, { emit }) {
+  setup() {
     const filterText = ref('');
     const showAdvancedFilters = ref(false);
-    const enableAutotags = ref(true);
+    const filtersStore = useFiltersStore();
+    const reportStore = useReportStore();
+    const { autotagsEnabled, filterCombination } = storeToRefs(filtersStore);
+    const { setDisplayType, setGroupBy } = filtersStore;
+    const { reportConfig } = storeToRefs(reportStore);
     const displayOptions = [
       DISPLAY_TYPES.TREE,
       DISPLAY_TYPES.FLAT
@@ -136,37 +131,24 @@ export default {
     const groupByOptions = [
       GROUP_BY_TYPES.FILE,
       GROUP_BY_TYPES.FUNCTIONALITY,
-    ]
-    const radioOptions = reactive([
-      {
-        id: 'filterOR',
-        label: 'Any',
-        value: 'OR',
-        checked: true,
-      },
-      {
-        id: 'filterAND',
-        label: 'All',
-        value: 'AND',
-        checked: false,
-      },
-    ]);
+    ];
+
     const onFilterTextUpdate = (text) => {
       filterText.value = text;
     }
 
     const onFilterOptionChecked = (optionChecked) => {
-      radioOptions.forEach((option) => {
+      filterCombination.value.forEach((option) => {
         option.checked = optionChecked.id === option.id;
       });
     }
 
     const handleDisplay = (type) => {
-      emit('displayChange', type);
+      setDisplayType(type);
     }
 
     const handleGroupBy = (type) => {
-
+      setGroupBy(type);
     }
 
     const handleModifiers = (type) => {
@@ -174,27 +156,25 @@ export default {
     }
 
     const handleAutotagsEnabled = (isChecked) => {
-      enableAutotags.value = isChecked;
+      autotagsEnabled.value = isChecked;
     }
 
     const toggleAdvancedFilters = () => {
       showAdvancedFilters.value = !showAdvancedFilters.value;
     }
 
-    const filtersState = computed(() => {
-      const state = {
-        autotags: enableAutotags.value,
-
-      }
-      return state;
-    });
+    const onSubmit = () => {
+      filtersStore.setTermsFilter(filterText.value);
+      reportStore.applyFilters();
+    }
 
     return {
+      reportConfig,
       filterText,
       showAdvancedFilters,
       displayOptions,
       groupByOptions,
-      radioOptions,
+      filterCombination,
       onFilterTextUpdate,
       onFilterOptionChecked,
       handleDisplay,
@@ -202,6 +182,7 @@ export default {
       handleModifiers,
       toggleAdvancedFilters,
       handleAutotagsEnabled,
+      onSubmit,
     }
 
   }

@@ -1,9 +1,9 @@
 export const tagFieldFormatter = (cell, formatterParams, onRendered) => {
-  return createTagNode(cell, true);
+  return createTagNode(cell, true, formatterParams);
 }
 
 export const modifiersFieldFormatter = (cell, formatterParams, onRendered) => {
-  return createTagNode(cell, false);
+  return createTagNode(cell, false, formatterParams);
 }
 
 export const descriptionFormatter = (cell, formatterParams, onRendered) => {
@@ -16,12 +16,12 @@ export const descriptionFormatter = (cell, formatterParams, onRendered) => {
 
 export const coverageTagFieldFormatter = (cell, formatterParams, onRendered) => {
   const data = cell.getData();
-  return data.label ? '' : createTagNode(cell, true);
+  return data.label ? '' : createTagNode(cell, true, formatterParams);
 }
 
 export const coverageModifiersFieldFormatter = (cell, formatterParams, onRendered) => {
   const data = cell.getData();
-  return  data.label ? '' : createTagNode(cell, false);
+  return  data.label ? '' : createTagNode(cell, false, formatterParams);
 }
 
 export const coverageDescriptionFormatter = (cell, formatterParams, onRendered) => {
@@ -39,12 +39,12 @@ export const coverageRowFormatter = (row) => {
   }
 }
 
-export const createTagNode = (cell, isTag = true) => {
+export const createTagNode = (cell, isTag = true, formatterParams) => {
   const data = cell.getData();
   const cellContainer = document.createElement('div');
   cellContainer.classList = 'tag-container';
   const nodes = cell.getValue().map((tag) => {
-    if (tag.auto && filterAutotags && !filterAutotags.checked) {
+    if (tag.auto && formatterParams.filterAutotags && !formatterParams.filterAutotags.checked) {
       return;
     }
     const tagContainer = document.createElement('div');

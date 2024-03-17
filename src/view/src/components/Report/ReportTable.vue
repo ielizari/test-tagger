@@ -3,112 +3,55 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
-import { TabulatorFull as Tabulator } from 'tabulator-tables';
-import { descriptionFormatter, modifiersFieldFormatter, tagFieldFormatter } from './tabulator.formatters';
-import { DISPLAY_TYPES } from './reportTypes';
+import { ref, onMounted, watch, computed } from 'vue';
+import { DISPLAY_TYPES, GROUP_BY_TYPES } from './reportTypes';
+import { useFiltersStore } from '@stores/filters.js';
+import { useReportStore } from '@stores/report.js';
+import { storeToRefs } from 'pinia';
 
 export default {
   name: 'ReportTable',
-  props: {
-    testData: {
-      type: Object,
-      required: true,
-    },
-    displayType: {
-      type: String,
-      required: false,
-      default: () => DISPLAY_TYPES.TREE.value,
-    },
-  },
-  setup(props) {
-    const tabulator = ref(null);
+  setup() {
     const table = ref(null);
     const treeChildField = 'nested';
     const fields = ['test', 'file', 'modifiers', 'codeTags'];
-    const formatterParams = ref({
-      currentDisplayData: DISPLAY_TYPES.TREE.value,
-    })
+    const filtersStore = useFiltersStore();
+    const reportStore = useReportStore();
+    const { autotagsEnabled, displayType, setDisplayType, groupBy } = storeToRefs(filtersStore);
 
-    watch(() => props.displayType, (newType, oldType) => {
+    watch(displayType, (newType, oldType) => {
       if (newType !== oldType) {
         if (newType === DISPLAY_TYPES.FLAT.value) {
-          tabulator.value = flatTable();
+          reportStore.flatTable(table.value);
         } else if (newType === DISPLAY_TYPES.TREE.value) {
-          tabulator.value = treeTable();
+          reportStore.treeTable(table.value);
         }
       }
-    }, { inmediate: true })
+    }, { inmediate: true });
 
-    const treeTable = () => {
-      return new Tabulator(table.value, {
-        data: props.testData,
-        reactiveData: true,
-        dataTree: true,
-        dataTreeStartExpanded: true,
-        dataTreeChildField: treeChildField,
-        layout: "fitColumns",
-        pagination: "local",
-        paginationSize:50,
-        history: true,
-        groupBy: 'file',
-        columns:[
-          {title:"Description", field:"test", variableHeight: true, widthGrow:2, formatter: descriptionFormatter, formatterParams: formatterParams.value},
-          {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: modifiersFieldFormatter},
-          {title:"Tags", field:"tags", widthGrow:1, formatter: tagFieldFormatter},
-        ],
-      });
-    }
-
-    const flatTable = () => {
-      return new Tabulator(table.value, {
-        data: flattenTests(props.testData),
-        layout: "fitColumns",
-        pagination: "local",
-        paginationSize:50,
-        history: true,
-        groupBy: 'file',
-        columns:[
-          {title:"Description", field:"test", variableHeight: true, widthGrow:2, formatter: descriptionFormatter, formatterParams: formatterParams.value},
-          {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: modifiersFieldFormatter},
-          {title:"Tags", field:"tags", widthGrow:1, formatter: tagFieldFormatter},
-        ],
-      });
-    }
-
-    const isTest = (item) => {
-      return ['it', 'test'].includes(item.name);
-    }
-    const flattenTests = (data, addParentLabels = true, parentLabel) => {
-      return data.reduce((flatTests, item) => {
-        const test = {...item};
-
-        if (addParentLabels) {
-          test.parentLabels = parentLabel?.map((label) => label) || [];
-        }
-
-        if (isTest(test)) {
-          flatTests.push(test);
-        } else {
-          if (test.nested?.length) {
-            flatTests = flatTests.concat(flattenTests(test.nested, addParentLabels, test.parentLabels.concat(test.test)));
+    watch(groupBy, (newType, oldType) => {
+      if(newType !== oldType) {
+        if(newType === GROUP_BY_TYPES.FILE.value) {
+          if (displayType.value === DISPLAY_TYPES.FLAT.value) {
+            reportStore.flatTable(table.value);
+          } else if(displayType.value === DISPLAY_TYPES.TREE.value) {
+            reportStore.treeTable(table.value);
           }
+        } else if (newType === GROUP_BY_TYPES.FUNCTIONALITY.value) {
+          reportStore.coverageTable(table.value);
         }
-        return flatTests;
-      }, []);
-    }
+      }
+    });
 
     onMounted(() => {
-      tabulator.value = treeTable();
+      reportStore.setTable(table.value)
+      reportStore.treeTable(table.value);
     })
     return {
-      tabulator,
       table,
       treeChildField,
       fields,
-      formatterParams,
     }
-
   }
 }
 </script>

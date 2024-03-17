@@ -43,7 +43,7 @@
         },
         {
           "label": "DocBlocks",
-          "tags": ["docblock"]
+          "tags": [["docblock", "dockblock"]]
         },
         {
           "label": "Autotags",

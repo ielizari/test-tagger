@@ -1,14 +1,13 @@
 <template>
   <Layout>
-    <ReportList :reportData="reportData"/>
+    <ReportList />
   </Layout>
 </template>
 
 <script>
-import { ref } from 'vue';
 import Layout from './components/layout/Layout.vue';
 import ReportList from './components/Report/ReportList.vue';
-import data from '@report/data.json';
+import { useReportStore } from '@stores/report';
 
 export default {
   name: 'App',
@@ -17,11 +16,8 @@ export default {
     ReportList,
   },
   setup() {
-    const reportData = ref(data);
-
-    return {
-      reportData,
-    }
+    const reportStore = useReportStore();
+    reportStore.initData();
   }
 }
 </script>
