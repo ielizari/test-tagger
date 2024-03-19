@@ -1,7 +1,10 @@
 const { readFile, writeFile, jsonString } = require('./files.js');
 
 const createReport = (data, errFiles, dryrun = false) => {
-  let template = readFile('../view/vanilla/report_template.html', __dirname);
+  const view = config.view || 'vanilla';
+  let template = view === 'vue' ?
+    readFile('../view/vue/dist/index.html', __dirname)
+    : readFile('../view/vanilla/report_template.html', __dirname);
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
   const timestamp = getDateTime();
   const reportConfig = getConfigScript();
@@ -20,14 +23,19 @@ const createReport = (data, errFiles, dryrun = false) => {
   const tabulatorScript = getTabulatorScript();
   const tabulatorCss = getTabulatorCss();
 
-  template = template
-    .replace(/###timestamp###/, timestamp)
-    .replace(/###css###/, cssString)
-    .replace(/###js###/, jsString)
-    .replace(/###config###/, reportConfig)
-    .replace(/###data###/, dataString)
-    .replace(/###tabulator_script###/, tabulatorScript)
-    .replace(/###tabulator_css###/, tabulatorCss);
+  if (view === 'vue') {
+    template = template
+      .replace(/'###data###'/, jsonFullData)
+  } else {
+    template = template
+      .replace(/###timestamp###/, timestamp)
+      .replace(/###css###/, cssString)
+      .replace(/###js###/, jsString)
+      .replace(/###config###/, reportConfig)
+      .replace(/###data###/, dataString)
+      .replace(/###tabulator_script###/, tabulatorScript)
+      .replace(/###tabulator_css###/, tabulatorCss);
+  }
 
   if (!dryrun) {
     writeFile(`${outDir}data.json`, jsonFullData);

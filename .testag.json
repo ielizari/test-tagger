@@ -9,6 +9,7 @@
     "**/.git/**"
   ],
   "outputDir": "report",
+  "view": "vue",
   "autotags": [
     {
       "tag": "peggy",

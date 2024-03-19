@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { DISPLAY_TYPES, GROUP_BY_TYPES } from '../components/Report/reportTypes.js';
-import data from '@report/data.json';
+//import data from '@report/data.json';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import {
   descriptionFormatter,
@@ -40,8 +40,8 @@ export const useReportStore = defineStore('report', () => {
   });
 
   const initData = () => {
-    testsData.value = data.data;
-    reportConfig.value = data.config;
+    testsData.value = window.reportData.data;
+    reportConfig.value = window.reportData.config;
     coverageData.value = getFunctionalityReportData();
   }
 

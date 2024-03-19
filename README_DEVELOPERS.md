@@ -61,3 +61,15 @@ Run:
 npm run ui-dev
 ```
 In your browser go to http://localhost:51173/
+
+Build vue ui template to be included in the module. This command will generate a single index.html file with a script tag declaring a string variable that is used as a placeholder. This placeholder will be replaced by the tests data when test-tagger command is run.
+```
+npm run ui-build
+```
+This will create the file `src/view/vue/dist/index.html`
+
+Then, execute test-tagger command to generate the tests report.
+```
+npm run app
+```
+This will create a 'report' folder and include the data.json in the index.html file created in this folder. Now you can open index.html in a browser to see the full ui with the data, all contained in a single html file.
