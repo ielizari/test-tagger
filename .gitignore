@@ -3,3 +3,4 @@ node_modules
 /report
 .dist
 test/prueba.spec.js
+src/view/vue/dist
