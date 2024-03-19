@@ -910,6 +910,63 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].nested[0].test).toEqual('test example');
     });
 
+    /**
+     * @tags for loop await
+     */
+    it('detects nested tests when there is a for...await of loop', () => {
+      const input = `
+        describe('Test example with await for', ()=>{
+          it('test example', async () => {
+            for await (const item of items) {
+              const myvar = await screen.findByText(item.type);
+              expect(myvar).toBeInTheDocument();
+            }
+          });
+        });
+      `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with await for');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
+
+    /**
+     * @tags while loop
+     */
+    it('detects nested tests when there is a while loop', () => {
+      const input = `
+        describe('Test example with while loop', ()=>{
+          it('test example', async () => {
+            while (x == 1) {
+              const myvar = await screen.findByText(item.type);
+              expect(myvar).toBeInTheDocument();
+            }
+          });
+        });
+      `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with while loop');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
+
+    it('detects tests when there is a for of loop', () => {
+      const input = `
+      describe('Test example with for...of loop', () => {
+
+        it('test example', async () => {
+          for await (const participant of participants) {
+            const linkType = await screen.findByText(participant.type);
+            expect(linkType).toBeInTheDocument();
+            for (const link of participant.links) {
+              const i = 0;
+            }
+          }
+        });
+      });
+      `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with for...of loop');
+      expect(analyzed[0].nested[0].test).toEqual('test example');
+    });
   });
 
   describe('Automatic test tagging', () => {

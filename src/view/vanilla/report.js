@@ -192,6 +192,19 @@ window.onload = () => {
       renderTable();
     });
 
+    function fillGroupFilterWithFunctionalReports() {
+      for(const report of reportCfg.coverage) {
+        const selFuncRep = document.createElement('option');
+        selFuncRep.textNode = report.name;
+        selFuncRep.text = report.name;
+        selFuncRep.value = report.id;
+        filterGroup.append(selFuncRep);
+      }
+    }
+
+    fillGroupFilterWithFunctionalReports();
+
+
     filterTestSkipped = document.getElementById('testExecutionSelector');
     filterTestSkipped.value = 'all';
     filterTestSkipped.addEventListener('change', (event) => {
@@ -322,13 +335,14 @@ window.onload = () => {
   }
 
   function renderTable() {
+    const summary = reportCfg.coverage.find((coverage) => coverage.id === currentGroupData);
     if(currentGroupData === 'file') {
       tableData = reportData;
-    } else if(currentGroupData === 'functionality') {
-      tableData = coverageData ? coverageData : getFunctionalityReportData();
-    }
+    } else if (summary){
+      tableData = coverageData ? coverageData : getFunctionalityReportData(summary);
+    };
 
-    if (currentGroupData === 'functionality') {
+    if (summary) {
       table = coverageTable();
     } else {
       if (currentDisplayData === 'flat') {
@@ -345,10 +359,10 @@ window.onload = () => {
     }
   }
 
-  function getFunctionalityReportData() {
-    if (!Array.isArray(reportCfg.coverage)) return;
+  function getFunctionalityReportData(summary) {
+    if (!Array.isArray(summary.rules)) return;
     const tests = flattenTests(reportData);
-    coverageData = reportCfg.coverage.map((item) => getTestCoverageMatch(tests, item));
+    coverageData = summary.rules.map((item) => getTestCoverageMatch(tests, item));
     const unmatchedTests = tests.filter((test) => !test.matchedCoverage);
     if (unmatchedTests.length) {
       coverageData.push({

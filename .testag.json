@@ -35,38 +35,44 @@
   ],
   "coverage": [
     {
-      "label": "PEGGY",
-      "tags": ["peggy"],
-      "children": [
+      "name": "PEGGY",
+      "id": "peggy",
+      "rules": [
         {
-          "label": "Javascript Syntax",
-          "tags": [["javascript"], ["syntax"]]
+          "label": "PEGGY",
+          "tags": ["peggy"],
+          "children": [
+            {
+              "label": "Javascript Syntax",
+              "tags": [["javascript"], ["syntax"]]
+            },
+            {
+              "label": "DocBlocks",
+              "tags": ["docblock"]
+            },
+            {
+              "label": "Autotags",
+              "tags": ["autotag"]
+            }
+          ]
         },
         {
-          "label": "DocBlocks",
-          "tags": [["docblock", "dockblock"]]
-        },
-        {
-          "label": "Autotags",
-          "tags": ["autotag"]
-        }
-      ]
-    },
-    {
-      "label": "REGEX",
-      "tags": ["regex"],
-      "children": [
-        {
-          "label": "Javascript Syntax",
-          "tags": [["javascript"], ["syntax"]]
-        },
-        {
-          "label": "DocBlocks",
-          "tags": ["docblock"]
-        },
-        {
-          "label": "Autotags",
-          "tags": ["autotag"]
+          "label": "REGEX",
+          "tags": ["regex"],
+          "children": [
+            {
+              "label": "Javascript Syntax",
+              "tags": [["javascript"], ["syntax"]]
+            },
+            {
+              "label": "DocBlocks",
+              "tags": ["docblock"]
+            },
+            {
+              "label": "Autotags",
+              "tags": ["autotag"]
+            }
+          ]
         }
       ]
     }
