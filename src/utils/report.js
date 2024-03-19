@@ -1,7 +1,7 @@
 const { readFile, writeFile, jsonString } = require('./files.js');
 
 const createReport = (data, errFiles, dryrun = false) => {
-  let template = readFile('../view/report_template.html', __dirname);
+  let template = readFile('../view/vanilla/report_template.html', __dirname);
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
   const timestamp = getDateTime();
   const reportConfig = getConfigScript();
@@ -15,8 +15,8 @@ const createReport = (data, errFiles, dryrun = false) => {
   const jsonData = jsonString(finalData.data);
   const errJsonData = jsonString(errFiles);
   const dataString = '<script type="text/javascript">const reportData=' + jsonData + '</script>';
-  const cssString = getReportCss(readFile('../view/styles.css', __dirname));
-  const jsString = getReportScript(readFile('../view/report.js', __dirname));
+  const cssString = getReportCss(readFile('../view/vanilla/styles.css', __dirname));
+  const jsString = getReportScript(readFile('../view/vanilla/report.js', __dirname));
   const tabulatorScript = getTabulatorScript();
   const tabulatorCss = getTabulatorCss();
 
