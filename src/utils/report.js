@@ -8,8 +8,14 @@ const createReport = (data, errFiles, dryrun = false) => {
   const outDir = config.outputDir.endsWith('/') ? config.outputDir : `${config.outputDir}/`;
   const timestamp = getDateTime();
   const reportConfig = getConfigScript();
+  const { fileCount, testCount, skipCount } = getSummary(data);
   const finalData = {
-    created: timestamp,
+    metadata: {
+      created: timestamp,
+      fileCount,
+      testCount,
+      skipCount,
+    },
     config: global.config,
     data: data,
     error: errFiles,
@@ -48,7 +54,11 @@ const createReport = (data, errFiles, dryrun = false) => {
   return {
     data: jsonData,
     report: template,
-    summary: getSummary(data),
+    summary: {
+      fileCount,
+      testCount,
+      skipCount,
+    },
   }
 }
 

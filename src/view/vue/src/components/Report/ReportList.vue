@@ -1,13 +1,14 @@
 <template>
   <section>
     <ReportFilters />
-    <ReportTable />
+    <ReportTable v-if="reportStore.isDataLoaded"/>
   </section>
 </template>
 
 <script>
 import ReportTable from './ReportTable.vue';
 import ReportFilters from './ReportFilters.vue';
+import { useReportStore } from '@stores/report';
 
 export default {
   name: 'ReportList',
@@ -15,5 +16,12 @@ export default {
     ReportTable,
     ReportFilters
   },
+  setup() {
+    const reportStore = useReportStore();
+
+    return {
+     reportStore,
+    }
+  }
 }
 </script>

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { DISPLAY_TYPES, GROUP_BY_TYPES } from '../components/Report/reportTypes.js';
-//import data from '@report/data.json';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import {
   descriptionFormatter,
@@ -14,6 +13,8 @@ import {
 } from '@utils/tabulator.formatters';
 import { useFiltersStore } from '@stores/filters.js';
 import { storeToRefs } from 'pinia';
+//import data from '@report/data.json'
+//const data = await import(/* @vite-ignore */import.meta.env.DEV ? '@report/data.json' : undefined);
 
 export const useReportStore = defineStore('report', () => {
   const filtersStore = useFiltersStore();
@@ -25,10 +26,12 @@ export const useReportStore = defineStore('report', () => {
     fieldsChecked
   } = storeToRefs(filtersStore);
 
+  const isDataLoaded = ref(false);
   const table = ref(null);
   const testsData = ref(null);
   const coverageData = ref([]);
   const reportConfig = ref(null);
+  const reportMetadata = ref(null);
   const report = ref(null);
   const treeChildField = 'nested';
   const fields = ['test', 'file', 'modifiers', 'codeTags'];
@@ -39,11 +42,25 @@ export const useReportStore = defineStore('report', () => {
     }
   });
 
-  const initData = () => {
-    testsData.value = window.reportData.data;
-    reportConfig.value = window.reportData.config;
+  const initData = async () => {
+    let data, config, metadata;
+    if (import.meta.env.DEV) {
+      const report = await import('@report/data.json');
+      data = report.data;
+      config = report.config;
+      metadata = report.metadata;
+    } else {
+      data = window.reportData.data
+      config = window.reportData.config;
+      metadata = window.reportData.metadata;
+    }
+
+    testsData.value = data;
+    reportConfig.value = config;
+    reportMetadata.value = metadata;
     coverageData.value = getFunctionalityReportData();
-  }
+    isDataLoaded.value = true;
+  };
 
   const getTestCoverageMatch = (testList, level) => {
     const resultLevel = createLevel(level);
@@ -100,7 +117,7 @@ export const useReportStore = defineStore('report', () => {
   };
 
   const getFunctionalityReportData = () => {
-    if (!Array.isArray(reportConfig.value.coverage)) return;
+    if (!Array.isArray(reportConfig.value?.coverage)) return;
     const tests = flattenTests(testsData.value);
     const coverageData = reportConfig.value?.coverage?.map((item) => getTestCoverageMatch(tests, item)) ?? [];
     const unmatchedTests = tests.filter((test) => !test.matchedCoverage);
@@ -245,9 +262,11 @@ export const useReportStore = defineStore('report', () => {
   }
 
   return {
+    isDataLoaded,
     table,
     testsData,
     reportConfig,
+    reportMetadata,
     report,
     initData,
     setTable,
