@@ -68,7 +68,7 @@ export const createTagNode = (cell, isTag = true, formatterParams) => {
   const cellContainer = document.createElement('div');
   cellContainer.classList = 'tag-container';
   const nodes = cell.getValue()?.map((tag) => {
-    if (tag.auto && formatterParams.filterAutotags && !formatterParams.filterAutotags.checked) {
+    if (tag.auto && !formatterParams.filterAutotags) {
       return;
     }
     const tagContainer = document.createElement('div');
