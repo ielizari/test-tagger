@@ -1,7 +1,7 @@
 <template>
   <section>
     <ReportFilters />
-    <ReportTable v-if="reportStore.isDataLoaded"/>
+    <ReportTable v-if="isDataLoaded"/>
   </section>
 </template>
 
@@ -9,6 +9,7 @@
 import ReportTable from './ReportTable.vue';
 import ReportFilters from './ReportFilters.vue';
 import { useReportStore } from '@stores/report';
+import { storeToRefs } from 'pinia';
 
 export default {
   name: 'ReportList',
@@ -18,9 +19,10 @@ export default {
   },
   setup() {
     const reportStore = useReportStore();
+    const { isDataLoaded } = storeToRefs(reportStore);
 
     return {
-     reportStore,
+     isDataLoaded,
     }
   }
 }

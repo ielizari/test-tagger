@@ -37,8 +37,8 @@ export default {
           } else if(displayType.value === DISPLAY_TYPES.TREE.value) {
             reportStore.treeTable(table.value);
           }
-        } else if (newType === GROUP_BY_TYPES.FUNCTIONALITY.value) {
-          reportStore.coverageTable(table.value);
+        } else {
+          reportStore.coverageTable(table.value, newType);
         }
       }
     });
