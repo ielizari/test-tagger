@@ -8,62 +8,135 @@ describe('PEGGY Test suite', () => {
   /**
    * @tags dockblock nested
    */
-  it('Detects nested dockblocks', () => {
-    const fileWithDocBlock = `
-    /**
-     * @tags pdp add_to_cart
-     * @tags_custom example-tag
-     */
-    describe('Test example', () => {
-      const a = 1;
-
+  describe('DocBlcoks', () => {
+    it('Detects nested docblocks and custom docblocks', () => {
+      const fileWithDocBlock = `
       /**
-       * @tags_device mobile
+       * @tags pdp add_to_cart
+       * @tags_custom example-tag
        */
-      it('nested it test', () => {
-        const b = () => { console.log('not test arrow function')};
-      })
-    });
-    `;
-    const expectedResult = [{
-      type: 'test',
-      name: 'describe',
-      test: 'Test example',
-      modifiers: [],
-      autoTags: [],
-      codeTags: {
-        tags: [
-          'pdp',
-          'add_to_cart'
-        ],
-        tags_custom: [
-          'example-tag'
-        ]
-      },
-      nested: [{
+      describe('Test example', () => {
+        const a = 1;
+  
+        /**
+         * @tags_device mobile
+         */
+        it('nested it test', () => {
+          const b = () => { console.log('not test arrow function')};
+        })
+      });
+      `;
+      const expectedResult = [{
         type: 'test',
-        name: 'it',
-        test: 'nested it test',
+        name: 'describe',
+        test: 'Test example',
         modifiers: [],
         autoTags: [],
         codeTags: {
-          tags_device: ['mobile']
+          tags: [
+            'pdp',
+            'add_to_cart'
+          ],
+          custom: [
+            'example-tag'
+          ]
         },
-        nested: [],
+        links: [],
+        nested: [{
+          type: 'test',
+          name: 'it',
+          test: 'nested it test',
+          modifiers: [],
+          autoTags: [],
+          codeTags: {
+            device: ['mobile']
+          },
+          links: [],
+          nested: [],
+          location: {
+            source: undefined,
+            start: { offset: 150, line: 8, column: 9 },
+            end: { offset: 320, line: 14, column: 7 }
+          }
+        }],
         location: {
           source: undefined,
-          start: { offset: 136, line: 8, column: 7 },
-          end: { offset: 294, line: 14, column: 5 }
+          start: { offset: 0, line: 1, column: 1 },
+          end: { offset: 323, line: 14, column: 10 }
         }
-      }],
-      location: {
-        source: undefined,
-        start: { offset: 0, line: 1, column: 1 },
-        end: { offset: 297, line: 14, column: 8 }
-      }
-    }];
-    const analyzed = peggyParser.parse(fileWithDocBlock.trim());
-    expect(analyzed).toStrictEqual(expectedResult);
+      }];
+      const analyzed = peggyParser.parse(fileWithDocBlock.trim());
+      expect(analyzed).toStrictEqual(expectedResult);
+    });
+
+    it('Detects test documentation links in docblocks', () => {
+      const fileWithDocBlock = `
+        /**
+         * @tags pdp
+         * @tags_link 'Pînia actions' https://pinia.vuejs.org/core-concepts/actions.html
+         * @tags_link 'Testing library - byRole' https://testing-library.com/docs/queries/byrole/
+         */
+        describe('Test example', () => {
+          const a = 1;
+
+          /**
+           * @tags_link 'Nested test link' https://testing-library.com/
+           */
+          it('nested it test', () => {
+            const b = () => { console.log('not test arrow function')};
+          })
+        });
+        `;
+        const expectedResult = [{
+          type: 'test',
+          name: 'describe',
+          test: 'Test example',
+          modifiers: [],
+          autoTags: [],
+          codeTags: {
+            tags: [
+              'pdp',
+            ],
+          },
+          links: [
+            {
+              label: 'Pînia actions',
+              src: 'https://pinia.vuejs.org/core-concepts/actions.html'
+            },
+            {
+              label: 'Testing library - byRole',
+              src: 'https://testing-library.com/docs/queries/byrole/'
+            },
+          ],
+          nested: [{
+            type: 'test',
+            name: 'it',
+            test: 'nested it test',
+            modifiers: [],
+            autoTags: [],
+            codeTags: {},
+            links: [
+              {
+                label: 'Nested test link',
+                src: 'https://testing-library.com/'
+              },
+            ],
+            nested: [],
+            location: {
+              source: undefined,
+              start: { offset: 299, line: 9, column: 11 },
+              end: { offset: 520, line: 15, column: 9 }
+            }
+          }],
+          location: {
+            source: undefined,
+            start: { offset: 0, line: 1, column: 1 },
+            end: { offset: 523, line: 15, column: 12 }
+          }
+        }];
+        const analyzed = peggyParser.parse(fileWithDocBlock.trim());
+        expect(analyzed).toStrictEqual(expectedResult);
+      });
   });
 
   /**
@@ -1125,7 +1198,6 @@ describe('PEGGY Test suite', () => {
           });
         });
         `;
-        //debugger;
       const analyzed = peggyParser.parse(input.trim(), { autotags: config.autotags });
       expect(analyzed[0].test).toEqual('Test example with curly');
       expect(analyzed[0].nested[0].test).toEqual('detects automatic tag when provided as string');

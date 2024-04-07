@@ -6,6 +6,7 @@ import {
   descriptionFormatter,
   modifiersFieldFormatter,
   tagFieldFormatter,
+  linkFieldFormatter,
   coverageRowFormatter,
   coverageDescriptionFormatter,
   coverageModifiersFieldFormatter,
@@ -13,8 +14,6 @@ import {
 } from '@utils/tabulator.formatters';
 import { useFiltersStore } from '@stores/filters.js';
 import { storeToRefs } from 'pinia';
-//import data from '@report/data.json'
-//const data = await import(/* @vite-ignore */import.meta.env.DEV ? '@report/data.json' : undefined);
 
 export const useReportStore = defineStore('report', () => {
   const filtersStore = useFiltersStore();
@@ -35,6 +34,7 @@ export const useReportStore = defineStore('report', () => {
   const report = ref(null);
   const treeChildField = 'nested';
   const fields = ['test', 'file', 'modifiers', 'codeTags'];
+  const coverageSummaries = ref([]);
   const formatterParams = computed(() => {
     return {
       currentDisplayData: DISPLAY_TYPES.TREE.value,
@@ -58,7 +58,8 @@ export const useReportStore = defineStore('report', () => {
     testsData.value = data;
     reportConfig.value = config;
     reportMetadata.value = metadata;
-    coverageData.value = getFunctionalityReportData();
+    coverageSummaries.value = getCoverageSummaries();
+    coverageData.value = coverageSummaries.value.map(getFunctionalityReportData);
     isDataLoaded.value = true;
   };
 
@@ -116,10 +117,14 @@ export const useReportStore = defineStore('report', () => {
     });
   };
 
-  const getFunctionalityReportData = () => {
-    if (!Array.isArray(reportConfig.value?.coverage)) return;
+  const getCoverageSummaries = () => {
+    return reportConfig.value?.coverage ?? [];
+  };
+
+  const getFunctionalityReportData = (summary) => {
+    if (!Array.isArray(summary.rules)) return;
     const tests = flattenTests(testsData.value);
-    const coverageData = reportConfig.value?.coverage?.map((item) => getTestCoverageMatch(tests, item)) ?? [];
+    const coverageData = summary.rules.map((item) => getTestCoverageMatch(tests, item)) ?? [];
     const unmatchedTests = tests.filter((test) => !test.matchedCoverage);
     if (unmatchedTests.length) {
       coverageData.push({
@@ -131,7 +136,10 @@ export const useReportStore = defineStore('report', () => {
         }
       })
     }
-    return coverageData;
+    return {
+      id: summary.id,
+      data: coverageData,
+    }
   };
 
   const setTable = (tableElement) => {
@@ -154,6 +162,7 @@ export const useReportStore = defineStore('report', () => {
         {title:"Description", field:"test", variableHeight: true, widthGrow:2, formatter: descriptionFormatter, formatterParams: formatterParams.value},
         {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: modifiersFieldFormatter, formatterParams: formatterParams.value},
         {title:"Tags", field:"tags", widthGrow:1, formatter: tagFieldFormatter, formatterParams: formatterParams.value},
+        {title: "Links", field:"links", widthGrow:1, formatter: linkFieldFormatter, formatterParams: formatterParams.value},
       ],
     });
   }
@@ -170,13 +179,15 @@ export const useReportStore = defineStore('report', () => {
         {title:"Description", field:"test", variableHeight: true, widthGrow:2, formatter: descriptionFormatter, formatterParams: formatterParams.value},
         {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: modifiersFieldFormatter, formatterParams: formatterParams.value},
         {title:"Tags", field:"tags", widthGrow:1, formatter: tagFieldFormatter, formatterParams: formatterParams.value},
+        {title: "Links", field:"links", widthGrow:1, formatter: linkFieldFormatter, formatterParams: formatterParams.value},
       ],
     });
   };
 
-  const coverageTable = (el) => {
+  const coverageTable = (el, summaryId) => {
+    const data = coverageData.value.find((item) => item.id === summaryId);
     report.value = new Tabulator(el, {
-      data: coverageData.value,
+      data: data.data,
       dataTree: true,
       dataTreeStartExpanded: true,
       dataTreeChildField: treeChildField,
@@ -189,6 +200,7 @@ export const useReportStore = defineStore('report', () => {
         {title:"Description", field:"test", variableHeight: true, widthGrow:2, formatter: coverageDescriptionFormatter, formatterParams: formatterParams.value},
         {title:"Modifiers", field:"modifiers", width:150, widthShrink:2, formatter: coverageModifiersFieldFormatter, formatterParams: formatterParams.value},
         {title:"Tags", field:"tags", widthGrow:1, formatter: coverageTagFieldFormatter, formatterParams: formatterParams.value},
+        {title: "Links", field:"links", widthGrow:1, formatter: linkFieldFormatter, formatterParams: formatterParams.value},
       ],
     });
   }
@@ -268,6 +280,7 @@ export const useReportStore = defineStore('report', () => {
     reportConfig,
     reportMetadata,
     report,
+    coverageSummaries,
     initData,
     setTable,
     treeTable,

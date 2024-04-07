@@ -104,13 +104,15 @@ testFnCall "test function call" = tags:docblock? _ fnName:testFnNames _ modifier
 		}
 	}
     //nested=testFn.flat(Number.POSITIVE_INFINITY)
+	const { links, ...codeTags } = tags ?? {};
 	return {
 		type: 'test',
     name: fnName,
 		test: description,
     modifiers: modifiers,
-    codeTags: tags,
+    codeTags: codeTags,
     autoTags: autoTags,
+		links: links ?? [],
 		nested: nested,
 		location: location()
 	}
@@ -146,13 +148,59 @@ arrowFnArgs "arrow function args" = _ "(" _ functionArgs? _ ")" _ / _ identifier
 directBlock "direct block" = _ block:(testFnCall / ignored_content) _ { return block; }
 curlyBlock "curly block" = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
 
-docblock "docblock" = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ { return inner.reduce((result, current) => { return {...result,...current}}, {}); }
-code_tag "code tag" = _ "* @" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
-	const mTag = tag;
+docblock "docblock" = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ {
+let tags = [];
+let links = [];
+for (const item of inner) {
+	if (item.tags) {
+   		tags = tags.concat(item.tags);
+    }
+    if (item.links) {
+    	links = links.concat(item.links);
+    }
+}
+const items = inner.reduce((result, current) => { return {...result,...current}}, {});
+const result = {
+	...items,
+    ...(tags.length && {tags: tags}),
+    ...(links.length && {links: links}),
+}
+
+return result;
+}
+code_tag "code tag" = string_tag / link_tag / custom_tag
+
+array_tag "array tag" =  _ "* @tags_EXTRA" _ ":" _ Array
+
+//string_tag "string tag" = _ "* @tags" tag:($[a-zA-Z0-9_-]*) " " value:[ a-zA-Z0-9_-]* _ {
+string_tag "string tag" = _ "* @tags " value:[ a-zA-Z0-9_-]* _ {
 	const mVal = value.join('').split(' ');
-	const result = { [mTag]: mVal };
+	const result = { tags: mVal };
 	return result;
 }
+
+link_tag "link tag" = _ "* @tags_link " label:(string) " " src:(text { return text().trim();}) _ {
+	return { links: [{ label, src}] };
+}
+
+custom_tag "custom tag" = _ "* @tags_" label:([a-zA-Z0-9-]+ { return text().trim(); }) " " value:[ a-zA-Z0-9_-]*_ {
+	const mVal = value.join('').split(' ');
+	const result = { [label]: mVal };
+	return result;
+}
+
+text "text" = (!whitespace .)+
+
+whitespace "whitespace"
+  = [ \t\v\f\u00A0\uFEFF\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]
+eolChar
+  = [\n\r\u2028\u2029]
+eol "end of line"
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u2028"
+  / "\u2029"
 
 functionArgs "function arguments" = _ args:(arg:fn_arg _ ","? _ { return arg; })* _ { return args; }
 fn_arg "function argument" =

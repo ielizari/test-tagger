@@ -98,12 +98,12 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import FormSelect from '../common/form/Select.vue';
 import FormTextInput from '../common/form/TextInput.vue';
 import RadioGroup from '../common/form/RadioGroup.vue';
 import FormCheckbox from '../common/form/Checkbox.vue';
-import { DISPLAY_TYPES, GROUP_BY_TYPES } from './reportTypes.js';
+import { DISPLAY_TYPES, GROUP_BY_TYPES, mapGroupByCoverage } from './reportTypes.js';
 import { useFiltersStore } from '@stores/filters.js';
 import { useReportStore } from '@stores/report.js';
 import { storeToRefs } from 'pinia';
@@ -123,15 +123,17 @@ export default {
     const reportStore = useReportStore();
     const { autotagsEnabled, filterCombination } = storeToRefs(filtersStore);
     const { setDisplayType, setGroupBy } = filtersStore;
-    const { reportConfig } = storeToRefs(reportStore);
+    const { reportConfig, coverageSummaries } = storeToRefs(reportStore);
     const displayOptions = [
       DISPLAY_TYPES.TREE,
       DISPLAY_TYPES.FLAT
     ];
-    const groupByOptions = [
-      GROUP_BY_TYPES.FILE,
-      GROUP_BY_TYPES.FUNCTIONALITY,
-    ];
+    const groupByOptions = computed(() => {
+      return [
+        GROUP_BY_TYPES.FILE,
+        ...(coverageSummaries.value.map(mapGroupByCoverage) ?? []),
+      ];
+    });
 
     const onFilterTextUpdate = (text) => {
       filterText.value = text;
