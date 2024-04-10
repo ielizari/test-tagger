@@ -1,6 +1,6 @@
 {
   "name": "test-tagger",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Utility for code tagging and automate report creation",
   "homepage": "https://github.com/ielizari/test-tagger",
   "main": "src/test-tagger-cli.js",
