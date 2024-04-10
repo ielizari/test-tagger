@@ -109,7 +109,7 @@ export const useReportStore = defineStore('report', () => {
   const checkIfTestMatchesCoverageLevel = (test, level) => {
     return level.tags?.length && level.tags.every((tagGroup) => {
       return test.tags.some((testTag) => {
-        if (testTag.auto && !autotagsEnabled.value?.checked) {
+        if (testTag.auto && !autotagsEnabled.value) {
           return false;
         }
         return Array.isArray(tagGroup) ? tagGroup.includes(testTag.name) : tagGroup === testTag.name;
