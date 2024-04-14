@@ -24,14 +24,14 @@
 				}
 			});
 		}
-		if(item.type === 'ignored') {
+		if(item?.type === 'ignored') {
 			tags.forEach((tagList) => {
 				const match = matchesTag(tagList, item.content)
 				if(match){
 					testAutoTags.push(match);
 				}
 			});
-		} else if (item.type === 'function call') {
+		} else if (item?.type === 'function call') {
 			tags.forEach((tagList) => {
 				const argMatch = matchesTag(tagList, item.args);
 				const nameMatch = matchesTag(tagList, item.name);
@@ -39,7 +39,7 @@
 					testAutoTags.push(tagList[0]);
 				}
 			});
-		} else if (item.type === 'test') {
+		} else if (item?.type === 'test') {
 			// tags.forEach((tagList) => {
 			// 	const match = matchesTag(tagList, item.test);
 			// 	if(match) {
@@ -97,9 +97,9 @@ testFnCall "test function call" = tags:docblock? _ fnName:testFnNames _ modifier
 	},[]);
 
 	if(Array.isArray(testFn)) {
-		nested = flatResults.filter((match) => match.type && match.type === 'test');
+		nested = flatResults.filter((match) => match?.type === 'test');
 	} else {
-		if (testFn.type && testFn.type === 'test') {
+		if (testFn?.type === 'test') {
 			nested.push(testFn);
 		}
 	}
@@ -146,7 +146,15 @@ standardFunction "standard function" = _ "async"? _ "function"? _ identifier? _ 
 arrowFunction "arrow function" = _ "async"? _ arrowFnArgs [ \t]* "=>" _ b:(curlyBlock / directBlock) _ { return b;}
 arrowFnArgs "arrow function args" = _ "(" _ functionArgs? _ ")" _ / _ identifier _
 directBlock "direct block" = _ block:(testFnCall / ignored_content) _ { return block; }
-curlyBlock "curly block" = _ "{" _ "return"? _ blockFns:(!"}" block:(conditional / testFnCall / functionCall / function / ignored_content) _ { return block; })*  _ "}" _ { return blockFns; }
+curlyBlock "curly block" = _ "{" _ "return"? _ blockFns:(!"}" block:(
+	conditional /
+	testFnCall /
+	functionCall /
+	function /
+	expression /
+	variable /
+	ignored_content
+	) _ { return block; })*  _ "}" _ { return blockFns; }
 
 docblock "docblock" = _ "/**" inner:(!"*/" i:(code_tag)* { return i; }) "*/" _ {
 let tags = [];
@@ -211,7 +219,7 @@ fn_arg "function argument" =
 
 expression "expression" =
 	conditional /
-	_ "(" _ v:(!")" assignment) _ ")" _ ";"? _ /
+	_ "(" _ v:(!")" (variable/assignment)) _ ")" _ ";"? _ /
   assignment /
   functionCall /
 	loop /
@@ -219,7 +227,7 @@ expression "expression" =
   $delete /
   return
 
-assignment "assignment" = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/$variable) _ ";"? _ {
+assignment "assignment" = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/expression/$variable) _ ";"? _ {
 	return {
 		type: 'assignment',
 		name: i,

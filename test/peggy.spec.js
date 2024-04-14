@@ -1040,6 +1040,26 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with for...of loop');
       expect(analyzed[0].nested[0].test).toEqual('test example');
     });
+
+    /**
+     * @tags object expression chain curly new-line nested
+     */
+      it('detects nested tests containing variable assignment of an empty object returned by an expression', () => {
+      const input = `
+        describe('Test example with empty object', ()=>{
+          const a = ({
+
+          });
+
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with empty object');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 
   describe('Automatic test tagging', () => {
@@ -1193,7 +1213,7 @@ describe('PEGGY Test suite', () => {
         describe('Test example with curly', ()=>{
 
           it('detects automatic tag when provided as string', () => {
-            var autotags == 1;
+            var autotags = 1;
             console.log('autotags included')
           });
         });
