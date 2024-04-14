@@ -32,9 +32,16 @@ const parseFiles = async(fn) => {
 }
 
 const mapFiles = (files) => {
-  return files
-    .map((node) => mapNode(node.file, node.content))
+  let tagList = [];
+  const fileNodes = files
+    .map((node) => {
+      const [nodes, fileTagList] = mapNode(node.file, node.content);
+      tagList = tagList.concat(fileTagList);
+      return nodes;
+    })
     .flat(Number.POSITIVE_INFINITY);
+  const tags = Array.from(new Set(tagList));
+  return [ fileNodes, tags ];
 }
 
 const isTest = (test) => {
@@ -42,6 +49,7 @@ const isTest = (test) => {
 }
 
 const mapNode = (file, content, parentTags, parentAutoTags, skipped) => {
+  let tagList = [];
   const result = content.map((item) => {
     let tags = item.codeTags?.tags || [];
     let autotags = item.autoTags || [];
@@ -53,9 +61,17 @@ const mapNode = (file, content, parentTags, parentAutoTags, skipped) => {
     }
     item.codeTags = tags;
     item.autoTags = (autotags && autotags.filter((autoTag) => !tags.includes(autoTag))) || [];
+    tagList = tagList.concat(tags);
+    tagList = tagList.concat(autotags);
     item.skipped = skipped ? INHERITED_SKIP : item.modifiers.includes('skip') && SKIP;
-    if (item.skipped && !item.modifiers.includes('skip')) item.modifiers.push('skip')
-    item.nested = item.nested?.length ? mapNode(file, item.nested, tags, autotags, item.skipped) : [];
+    if (item.skipped && !item.modifiers.includes('skip')) item.modifiers.push('skip');
+    if (item.nested?.length) {
+      const [nestedNodes, nestedTagList] = mapNode(file, item.nested, tags, autotags, item.skipped);
+      item.nested = nestedNodes;
+      tagList = tagList.concat(nestedTagList);
+    } else {
+      item.nested = [];
+    }
     item.itemCount = item.nested.reduce((total, test) => {
       const checkTest = isTest(test);
       return {
@@ -66,7 +82,7 @@ const mapNode = (file, content, parentTags, parentAutoTags, skipped) => {
     }, { items: 0, tests: 0, skipped: 0 });
     return treeDTO(item, file);
   });
-  return result;
+  return [ result, tagList ];
 }
 
 const treeDTO = (test, file) => {

@@ -51,8 +51,8 @@ parseFiles(peggyParser)
         errFiles.push(file) :
         preMappedFiles.push(file);
     })
-    const mappedFiles = mapFiles(preMappedFiles);
-    const { summary } = createReport(mappedFiles, errFiles, global.dryrun);
+    const [ mappedFiles, tagList ] = mapFiles(preMappedFiles);
+    const { summary } = createReport(mappedFiles, tagList, errFiles, global.dryrun);
 
     console.log(nodeColors('FgGreen'), `Parsed ${summary.testCount} tests in ${summary.fileCount} files`, nodeColors('FgWhite'));
     errFiles.length && console.log(nodeColors('FgRed'), `\nExcluded ${errFiles.length} files`);

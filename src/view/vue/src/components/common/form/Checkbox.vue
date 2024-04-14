@@ -68,6 +68,15 @@ export default {
 .form-checkbox__container {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  width: 100%;
+
+  label {
+    width: 100%;
+    padding: 0.3rem 0;
+    cursor: pointer;
+  }
 
   &.label--left {
     flex-direction: row;
@@ -81,5 +90,6 @@ export default {
   &.label--bottom {
     flex-direction: column-reverse;
   }
+
 }
 </style>

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { DISPLAY_TYPES, GROUP_BY_TYPES } from '../components/Report/reportTypes.js';
+import { DISPLAY_TYPES, GROUP_BY_TYPES, SKIPPED_TYPES } from '../components/Report/reportTypes.js';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import {
   descriptionFormatter,
@@ -22,7 +22,8 @@ export const useReportStore = defineStore('report', () => {
     termsFilter,
     currentSkippedTestsData,
     filterCombination,
-    fieldsChecked
+    fieldsChecked,
+    tagsFilter
   } = storeToRefs(filtersStore);
 
   const isDataLoaded = ref(false);
@@ -33,7 +34,6 @@ export const useReportStore = defineStore('report', () => {
   const reportMetadata = ref(null);
   const report = ref(null);
   const treeChildField = 'nested';
-  const fields = ['test', 'file', 'modifiers', 'codeTags'];
   const coverageSummaries = ref([]);
   const formatterParams = computed(() => {
     return {
@@ -231,6 +231,9 @@ export const useReportStore = defineStore('report', () => {
     if (!table.value) return;
     report.value.clearFilter();
     report.value.addFilter(filterSkipped);
+    if (tagsFilter.value?.length) {
+      report.value.addFilter(filterByTags);
+    }
     if(!termsFilter.value) return;
 
     const filters = termsFilter.value.split(' ');
@@ -242,10 +245,23 @@ export const useReportStore = defineStore('report', () => {
   }
 
   const filterSkipped = (data) => {
-    if(currentSkippedTestsData === 'skipped' && !data.skipped) return false;
-    if(currentSkippedTestsData === 'not-skipped' && data.skipped) return false;
+    if(currentSkippedTestsData.value === SKIPPED_TYPES.SKIPPED.value && !data.skipped) return false;
+    if(currentSkippedTestsData.value === SKIPPED_TYPES.NOT_SKIPPED.value && data.skipped) return false;
     return true;
   }
+
+  const filterByTags = (data) => {
+    let isMatch = tagsFilter.value.every((filterTag) => {
+      const match = data.tags?.find((tag) => tag.name === filterTag.value);
+      return Boolean(match);
+    });
+
+    if (!isMatch && data.nested) {
+      isMatch = data.nested.find((test) => filterByTags(test));
+    }
+
+    return Boolean(isMatch);
+  };
 
   const filterTree = (data, words) => {
     if(!words || (Array.isArray(words) && !words.length)) return true;
