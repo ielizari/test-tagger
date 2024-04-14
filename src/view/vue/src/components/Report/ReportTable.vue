@@ -4,7 +4,7 @@
 
 <script>
 import { ref, onMounted, watch, computed } from 'vue';
-import { DISPLAY_TYPES, GROUP_BY_TYPES } from './reportTypes';
+import { DISPLAY_TYPES, GROUP_BY_TYPES, SKIPPED_TYPES } from './reportTypes';
 import { useFiltersStore } from '@stores/filters.js';
 import { useReportStore } from '@stores/report.js';
 import { storeToRefs } from 'pinia';
@@ -17,7 +17,14 @@ export default {
     const fields = ['test', 'file', 'modifiers', 'codeTags'];
     const filtersStore = useFiltersStore();
     const reportStore = useReportStore();
-    const { autotagsEnabled, displayType, setDisplayType, groupBy } = storeToRefs(filtersStore);
+    const {
+      autotagsEnabled,
+      displayType,
+      setDisplayType,
+      groupBy,
+      currentSkippedTestsData,
+      tagsFilter,
+    } = storeToRefs(filtersStore);
 
     watch(displayType, (newType, oldType) => {
       if (newType !== oldType) {
@@ -42,6 +49,16 @@ export default {
         }
       }
     });
+
+    watch(currentSkippedTestsData, (newType, oldType) => {
+      if(newType !== oldType) {
+        reportStore.applyFilters();
+      }
+    });
+
+    watch(tagsFilter, (tags) => {
+      reportStore.applyFilters();
+    }, { deep: true });
 
     onMounted(() => {
       reportStore.setTable(table.value)

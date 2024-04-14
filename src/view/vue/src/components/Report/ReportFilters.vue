@@ -1,26 +1,33 @@
 <template>
   <div id="table-filters">
-    <form id="filter-form">
+    <form id="filter-form" @submit.prevent>
       <div class="display-options">
         <FormSelect
           :id="'displaySelector'"
           :label="'Display'"
           :options="displayOptions"
+          :defaultSelectedOption="DISPLAY_TYPES.TREE.value"
           @optionSelected="handleDisplay" />
         <FormSelect
           :id="'groupSelector'"
           :label="'Group by'"
           :options="groupByOptions"
+          :defaultSelectedOption="GROUP_BY_TYPES.FILE.value"
           @optionSelected="handleGroupBy" />
         <FormSelect
           :id="'textExecutionSelector'"
           :label="'Show tests'"
-          :options="[
-            { label: 'All', value:'all'},
-            { label: 'Skipped only', value: 'skipped'},
-            { label: 'Not skipped', value: 'not-skipped'}
-          ]"
+          :options="skippedOptions"
+          :defaultSelectedOption="SKIPPED_TYPES.ALL.value"
           @optionSelected="handleModifiers" />
+        <FormSelect
+          v-if="tagOptions"
+          :id="'tagsFilter'"
+          :label="'Tags'"
+          :multiselect="true"
+          :searchbar="true"
+          :options="tagOptions"
+          @optionSelected="handleTags" />
       </div>
       <div class="filter-options">
         <div>
@@ -28,13 +35,6 @@
             :id="'filter-input'"
             @update:text="onFilterTextUpdate"
           />
-          <button
-            id="filterApply"
-            type="submit"
-            @click.prevent="onSubmit"
-          >
-            Filter
-          </button>
         </div>
         <div>
           <RadioGroup
@@ -103,7 +103,7 @@ import FormSelect from '../common/form/Select.vue';
 import FormTextInput from '../common/form/TextInput.vue';
 import RadioGroup from '../common/form/RadioGroup.vue';
 import FormCheckbox from '../common/form/Checkbox.vue';
-import { DISPLAY_TYPES, GROUP_BY_TYPES, mapGroupByCoverage } from './reportTypes.js';
+import { DISPLAY_TYPES, GROUP_BY_TYPES, SKIPPED_TYPES, mapGroupByCoverage } from './reportTypes.js';
 import { useFiltersStore } from '@stores/filters.js';
 import { useReportStore } from '@stores/report.js';
 import { storeToRefs } from 'pinia';
@@ -122,8 +122,8 @@ export default {
     const filtersStore = useFiltersStore();
     const reportStore = useReportStore();
     const { autotagsEnabled, filterCombination } = storeToRefs(filtersStore);
-    const { setDisplayType, setGroupBy } = filtersStore;
-    const { reportConfig, coverageSummaries } = storeToRefs(reportStore);
+    const { setDisplayType, setGroupBy, setModifiersFilter, setTagsFilter } = filtersStore;
+    const { reportConfig, coverageSummaries, reportMetadata } = storeToRefs(reportStore);
     const displayOptions = [
       DISPLAY_TYPES.TREE,
       DISPLAY_TYPES.FLAT
@@ -135,8 +135,30 @@ export default {
       ];
     });
 
+    const skippedOptions = computed(() => {
+      return [
+        SKIPPED_TYPES.ALL,
+        SKIPPED_TYPES.SKIPPED,
+        SKIPPED_TYPES.NOT_SKIPPED,
+      ]
+    });
+
+    const tagOptions = computed(() => {
+      return reportMetadata.value?.tagList?.map((tag) => {
+        return {
+          label: tag,
+          value: tag,
+        }
+      });
+    });
+
+    const handleTags = (tags) => {
+      setTagsFilter(tags)
+    }
+
     const onFilterTextUpdate = (text) => {
       filterText.value = text;
+      onSubmit();
     }
 
     const onFilterOptionChecked = (optionChecked) => {
@@ -146,15 +168,15 @@ export default {
     }
 
     const handleDisplay = (type) => {
-      setDisplayType(type);
+      setDisplayType(type[0].value);
     }
 
     const handleGroupBy = (type) => {
-      setGroupBy(type);
+      setGroupBy(type[0].value);
     }
 
     const handleModifiers = (type) => {
-
+      setModifiersFilter(type[0].value)
     }
 
     const handleAutotagsEnabled = (isChecked) => {
@@ -176,6 +198,8 @@ export default {
       showAdvancedFilters,
       displayOptions,
       groupByOptions,
+      skippedOptions,
+      tagOptions,
       filterCombination,
       onFilterTextUpdate,
       onFilterOptionChecked,
@@ -185,6 +209,10 @@ export default {
       toggleAdvancedFilters,
       handleAutotagsEnabled,
       onSubmit,
+      handleTags,
+      DISPLAY_TYPES,
+      GROUP_BY_TYPES,
+      SKIPPED_TYPES,
     }
 
   }

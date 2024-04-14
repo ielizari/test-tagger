@@ -1,6 +1,6 @@
 const { readFile, writeFile, jsonString } = require('./files.js');
 
-const createReport = (data, errFiles, dryrun = false) => {
+const createReport = (data, tagList, errFiles, dryrun = false) => {
   const view = config.view || 'vanilla';
   let template = view === 'vue' ?
     readFile('../view/vue/dist/index.html', __dirname)
@@ -15,6 +15,7 @@ const createReport = (data, errFiles, dryrun = false) => {
       fileCount,
       testCount,
       skipCount,
+      tagList,
     },
     config: global.config,
     data: data,

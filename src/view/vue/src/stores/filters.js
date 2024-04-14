@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref, reactive } from 'vue';
-import { DISPLAY_TYPES, GROUP_BY_TYPES } from '../components/Report/reportTypes.js';
+import { DISPLAY_TYPES, GROUP_BY_TYPES, SKIPPED_TYPES } from '../components/Report/reportTypes.js';
 
 export const useFiltersStore = defineStore('filers', () => {
   const autotagsEnabled = ref(true);
   const displayType = ref(DISPLAY_TYPES.TREE.value);
   const groupBy = ref(GROUP_BY_TYPES.FILE.value);
   const termsFilter = ref('');
-  const currentSkippedTestsData = ref('all');
+  const currentSkippedTestsData = ref(SKIPPED_TYPES.ALL.value);
+  const tagsFilter = ref([]);
   const fieldsChecked = ref(['test', 'file', 'modifiers', 'codeTags']);
   const filterCombination = reactive([
     {
@@ -29,6 +30,8 @@ export const useFiltersStore = defineStore('filers', () => {
   const setDisplayType = (type) => displayType.value = type;
   const setTermsFilter = (terms) => termsFilter.value = terms;
   const setGroupBy = (type) => groupBy.value = type;
+  const setModifiersFilter = (modifier) => currentSkippedTestsData.value = modifier;
+  const setTagsFilter = (tags) => tagsFilter.value = tags;
 
   return {
     autotagsEnabled,
@@ -43,5 +46,8 @@ export const useFiltersStore = defineStore('filers', () => {
     setTermsFilter,
     setGroupBy,
     currentSkippedTestsData,
+    setModifiersFilter,
+    tagsFilter,
+    setTagsFilter,
   }
 });
