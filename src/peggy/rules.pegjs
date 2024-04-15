@@ -218,7 +218,7 @@ fn_arg "function argument" =
 	variable /
 	identifier _ "="_ variable
 
-objectFnArgs "object args" = _ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectFnArgValue?)? _ ","? _  { return [k,v]; })* _ "}" _ { console.log(pair); return pair; }
+objectFnArgs "object args" = _ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectFnArgValue?)? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
 ObjectFnArgValue "object value" = _ ("="/":") _ v:(function/functionCall/$variable) _ { return v; }
 
 expression "expression" =
