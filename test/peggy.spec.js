@@ -1060,6 +1060,26 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with empty object');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
+
+    /**
+     * @tags function object arguments default
+     */
+    it('detects nested tests containing function with object parameter and default value', () => {
+      const input = `
+        describe('Test example with empty object', ()=>{
+          const a = ({ b = 'Desktop' }) => {
+            return a;
+          }
+
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with empty object');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 
   describe('Automatic test tagging', () => {
