@@ -215,6 +215,7 @@ fn_arg "function argument" =
 	function /
 	functionCall /
 	objectFnArgs /
+	assignment /
 	variable /
 	identifier _ "="_ variable
 
@@ -246,7 +247,7 @@ assignmentOperands "assignment operands" =
 
 assignmentVariable "variable assignment" = _ v:((identifier _ "." _)* i:$identifier _ ","?)+ _ { return v}
 
-functionCall "function call" = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ";"? _ {
+functionCall "function call" = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ("." _ identifier)? _ ";"? _ {
 	const nested = Array.isArray(args) ? args.filter(arg => arg).flat(Number.POSITIVE_INFINITY) : new Array(args);
 	const nestedTests = nested.filter(item => item?.type === 'test')
 	if (nestedTests.length) return nestedTests;
@@ -294,7 +295,7 @@ variable "variable" =
 	integer /
 	boolean
 
-Array "array" = _ "[" _ val:(!"]" v:$variable _ ","? _  { return v; })* _ "]" _ { return val; }
+Array "array" = _ "[" _ val:(!"]" spreadOperator? v:(function/functionCall/$variable) _ ","? _  { return v; })* _ "]" _ { return val; }
 Object "object" =_ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectValue?) _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
 ObjectKey "object key" = _ k:$(function / functionCall / identifier / string / Array / integer / ignored_content) _ { return k; }
 ObjectValue "object value" = _ ":" _ v:(function/functionCall/$variable) _ { return v; }

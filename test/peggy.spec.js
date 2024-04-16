@@ -1080,6 +1080,61 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test example with empty object');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
+
+     /**
+     * @tags function object arguments default
+     */
+     it('detects nested tests containing function with object parameter and default value', () => {
+      const input = `
+        describe('Test example with function argument default value', ()=>{
+          const a = (b = 'Desktop') => {
+            return a;
+          }
+
+          it('Second test example', () => {
+            console.log('testing')
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with function argument default value');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags function object arguments
+     */
+      it('detects nested tests containing function with argument being a property resulting from a function call chain', () => {
+      const input = `
+        describe('Test example with function argument default value', ()=>{
+          it('Second test example', () => {
+            const stockResponse = aStockResponse(
+              skuColorMultiSizeS().build().stock
+            )
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test example with function argument default value');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
+
+    /**
+     * @tags function object array arguments
+     */
+    it('detects nested tests containing function chain and object argument with array having a function call as value', () => {
+      const input = `
+        describe('Test describe', ()=>{
+          it('Second test example', () => {
+            const a = test()
+            .withOpt({ reference: [aFunc()] })
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test describe');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 
   describe('Automatic test tagging', () => {
