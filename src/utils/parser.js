@@ -5,6 +5,7 @@ const INHERITED_SKIP = 'inherit_skip';
 
 const parseFile = (fn, filePath) => {
   const absolutePath = path.resolve(config.rootDir, filePath);
+  console.log(`Parsing file: ${absolutePath}`);
   try {
     const fileContent = fn(readFile(absolutePath), filePath);
     return parsedFileDto(absolutePath, fileContent);

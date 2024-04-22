@@ -5,7 +5,7 @@ const regexParse = require('./regex/parser');
 const { parseFile: peggyParser } = require('./peggy');
 const { createReport } = require('./utils/report');
 const { parseFiles, mapFiles } = require('./utils/parser');
-const { getFilePath } = require('./utils/files');
+const { getFilePath, existsFile } = require('./utils/files');
 const { nodeColors } = require('./utils/colors.js');
 const util = require('util');
 
@@ -25,7 +25,8 @@ if (argv.dryrun) {
 function getConfig(path) {
   const defaultConfig = require('./config/default.json');
   const hostConfigPath = path ? path : '.testag.json';
-  const hostConfig = require(getFilePath(hostConfigPath));
+  const fullPath = getFilePath(hostConfigPath);
+  const hostConfig = existsFile(fullPath) ? require(fullPath) : {};
   return {
     ...defaultConfig,
     ...hostConfig,
