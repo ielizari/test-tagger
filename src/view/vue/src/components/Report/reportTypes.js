@@ -1,3 +1,7 @@
+export const VIEW_TYPES = Object.freeze({
+  LIST: { label: 'List', value: 'list'},
+  GRAPH: { label: 'Graph', value: 'graph'},
+});
 
 export const DISPLAY_TYPES = Object.freeze({
   TREE: {label: 'Tree', value:'tree'},

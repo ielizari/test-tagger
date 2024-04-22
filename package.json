@@ -38,6 +38,7 @@
     "vite-plugin-singlefile": "^2.0.1"
   },
   "dependencies": {
+    "cytoscape": "^3.29.0",
     "glob": "^10.2.7",
     "minimatch": "^9.0.3",
     "peggy": "^3.0.2",
