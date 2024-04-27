@@ -1135,6 +1135,21 @@ describe('PEGGY Test suite', () => {
       expect(analyzed[0].test).toEqual('Test describe');
       expect(analyzed[0].nested[0].test).toEqual('Second test example');
     });
+
+    it('detects nested tests containing object assignment to a function with a math operation as argument', () => {
+      const input = `
+        describe('Test describe', ()=>{
+          it('Second test example', () => {
+            const a = {
+              navigation_node: { path: '/path'.repeat(index + 1) },
+            };
+          })
+        });
+        `;
+      const analyzed = peggyParser.parse(input.trim());
+      expect(analyzed[0].test).toEqual('Test describe');
+      expect(analyzed[0].nested[0].test).toEqual('Second test example');
+    });
   });
 
   describe('Automatic test tagging', () => {

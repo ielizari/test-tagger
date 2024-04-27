@@ -225,7 +225,8 @@ fn_arg "function argument" =
 	objectFnArgs /
 	assignment /
 	variable /
-	identifier _ "="_ variable
+	identifier _ "="_ variable /
+	expression
 
 objectFnArgs "object args" = _ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectFnArgValue?)? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
 ObjectFnArgValue "object value" = _ ("="/":") _ v:(function/functionCall/$variable) _ { return v; }
@@ -238,7 +239,8 @@ expression "expression" =
 	loop /
 	import /
   $delete /
-  return
+  return /
+	mathOperator
 
 assignment "assignment" = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/expression/$variable) _ ";"? _ {
 	return {
@@ -320,6 +322,7 @@ string "string" =
 	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; } /
   $regex
 
+mathOperator "math operator" = "+" / "-" / "/" / "*" / "^"
 typeOperator "type operator" = "typeof" / "instanceof"
 bitwiseOperator "bitwise operator" = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
 logicalOperator "logical operator" = "&&" / "||" / notOperator
