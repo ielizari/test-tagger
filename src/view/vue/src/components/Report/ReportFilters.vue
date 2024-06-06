@@ -3,6 +3,12 @@
     <form id="filter-form" @submit.prevent>
       <div class="display-options">
         <FormSelect
+          :id="'viewSelector'"
+          :label="'View'"
+          :options="viewOptions"
+          :defaultSelectedOption="VIEW_TYPES.LIST.value"
+          @optionSelected="handleView" />
+        <FormSelect
           :id="'displaySelector'"
           :label="'Display'"
           :options="displayOptions"
@@ -103,7 +109,7 @@ import FormSelect from '../common/form/Select.vue';
 import FormTextInput from '../common/form/TextInput.vue';
 import RadioGroup from '../common/form/RadioGroup.vue';
 import FormCheckbox from '../common/form/Checkbox.vue';
-import { DISPLAY_TYPES, GROUP_BY_TYPES, SKIPPED_TYPES, mapGroupByCoverage } from './reportTypes.js';
+import { VIEW_TYPES, DISPLAY_TYPES, GROUP_BY_TYPES, SKIPPED_TYPES, mapGroupByCoverage } from './reportTypes.js';
 import { useFiltersStore } from '@stores/filters.js';
 import { useReportStore } from '@stores/report.js';
 import { storeToRefs } from 'pinia';
@@ -116,7 +122,8 @@ export default {
     RadioGroup,
     FormCheckbox,
   },
-  setup() {
+  emits: ['changeView'],
+  setup(props, { emit }) {
     const filterText = ref('');
     const showAdvancedFilters = ref(false);
     const filtersStore = useFiltersStore();
@@ -124,6 +131,10 @@ export default {
     const { autotagsEnabled, filterCombination } = storeToRefs(filtersStore);
     const { setDisplayType, setGroupBy, setModifiersFilter, setTagsFilter } = filtersStore;
     const { reportConfig, coverageSummaries, reportMetadata } = storeToRefs(reportStore);
+    const viewOptions = [
+      VIEW_TYPES.LIST,
+      VIEW_TYPES.GRAPH,
+    ]
     const displayOptions = [
       DISPLAY_TYPES.TREE,
       DISPLAY_TYPES.FLAT
@@ -167,6 +178,10 @@ export default {
       });
     }
 
+    const handleView = (type) => {
+      emit('changeView', type[0].value);
+    };
+
     const handleDisplay = (type) => {
       setDisplayType(type[0].value);
     }
@@ -196,6 +211,7 @@ export default {
       reportConfig,
       filterText,
       showAdvancedFilters,
+      viewOptions,
       displayOptions,
       groupByOptions,
       skippedOptions,
@@ -203,6 +219,7 @@ export default {
       filterCombination,
       onFilterTextUpdate,
       onFilterOptionChecked,
+      handleView,
       handleDisplay,
       handleGroupBy,
       handleModifiers,
@@ -213,6 +230,7 @@ export default {
       DISPLAY_TYPES,
       GROUP_BY_TYPES,
       SKIPPED_TYPES,
+      VIEW_TYPES,
     }
 
   }
