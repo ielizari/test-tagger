@@ -27,10 +27,15 @@ const jsonString = (data) => {
   return JSON.stringify(data, null, 2);
 }
 
+const existsFile = (path) => {
+  return fs.existsSync(path);
+}
+
 module.exports = {
   readFile,
   writeFile,
   getFilePath,
   listFiles,
   jsonString,
+  existsFile,
 }

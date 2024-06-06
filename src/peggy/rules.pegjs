@@ -1,5 +1,13 @@
 {
-
+	const TYPES = Object.freeze({
+		FUNCTION_CALL: 'function call',
+		IGNORED_CONTENT: 'ignored',
+		TEST: 'test',
+		IMPORT: 'import',
+		EACH: 'each',
+		ASSIGNMENT: 'assignment',
+		UNKNOWN_MODIFIER: 'unknown',
+	})
   const tags = getAutotagConfig();
 
 	function getAutotagConfig () {
@@ -24,22 +32,22 @@
 				}
 			});
 		}
-		if(item?.type === 'ignored') {
-			tags.forEach((tagList) => {
-				const match = matchesTag(tagList, item.content)
-				if(match){
-					testAutoTags.push(match);
-				}
-			});
-		} else if (item?.type === 'function call') {
-			tags.forEach((tagList) => {
-				const argMatch = matchesTag(tagList, item.args);
-				const nameMatch = matchesTag(tagList, item.name);
-				if(argMatch || nameMatch) {
-					testAutoTags.push(tagList[0]);
-				}
-			});
-		} else if (item?.type === 'test') {
+		if(item?.type === TYPES.IGNORED_CONTENT) {
+			// tags.forEach((tagList) => {
+			// 	const match = matchesTag(tagList, item.content)
+			// 	if(match){
+			// 		testAutoTags.push(match);
+			// 	}
+			// });
+		} else if (item?.type === TYPES.FUNCTION_CALL) {
+			// tags.forEach((tagList) => {
+			// 	const argMatch = matchesTag(tagList, item.args);
+			// 	const nameMatch = matchesTag(tagList, item.name);
+			// 	if(argMatch || nameMatch) {
+			// 		testAutoTags.push(tagList[0]);
+			// 	}
+			// });
+		} else if (item?.type === TYPES.TEST) {
 			// tags.forEach((tagList) => {
 			// 	const match = matchesTag(tagList, item.test);
 			// 	if(match) {
@@ -85,7 +93,7 @@
 }
 start "entrypoint" = result:(testFnCall / ignored_content)* {
 	//return result
-	return result.filter((match) => match.type !== 'ignored');
+	return result.filter((match) => match.type !== TYPES.IGNORED_CONTENT);
 }
 
 testFnCall "test function call" = tags:docblock? _ fnName:testFnNames _ modifiers:testModifiers* "(" _ description:testDescription _ "," testFn:testFunction ( _ "," _ variable _)? _ ")" _ ";"? _ {
@@ -97,16 +105,16 @@ testFnCall "test function call" = tags:docblock? _ fnName:testFnNames _ modifier
 	},[]);
 
 	if(Array.isArray(testFn)) {
-		nested = flatResults.filter((match) => match?.type === 'test');
+		nested = flatResults.filter((match) => match?.type === TYPES.TEST);
 	} else {
-		if (testFn?.type === 'test') {
+		if (testFn?.type === TYPES.TEST) {
 			nested.push(testFn);
 		}
 	}
     //nested=testFn.flat(Number.POSITIVE_INFINITY)
 	const { links, ...codeTags } = tags ?? {};
 	return {
-		type: 'test',
+		type: TYPES.TEST,
     name: fnName,
 		test: description,
     modifiers: modifiers,
@@ -124,8 +132,8 @@ testFnNames "test function names" =
 	"it"
 
 testModifiers "test modifiers" = _ "." _ mod:("skip" / "only" / "failing" / "concurrent" / eachModifier / unknownModifier) _ { return mod; }
-eachModifier "each modifier" = "each" _ "(" _ a:(Array / identifier / functionCall)? _ ")" { return { type: 'each', values: a }; }
-unknownModifier "unknown modifier" =  i:identifier { return { type: 'unknown', value: i }; }
+eachModifier "each modifier" = "each" _ "(" _ a:(Array / identifier / functionCall)? _ ")" { return { type: TYPES.EACH, values: a }; }
+unknownModifier "unknown modifier" =  i:identifier { return { type: TYPES.UNKNOWN_MODIFIER, value: i }; }
 
 testDescription "test description" =
 	string /
@@ -217,7 +225,8 @@ fn_arg "function argument" =
 	objectFnArgs /
 	assignment /
 	variable /
-	identifier _ "="_ variable
+	identifier _ "="_ variable /
+	expression
 
 objectFnArgs "object args" = _ "{" _ pair:(!"}" k:(spreadOperator? _ ObjectKey (_ "." _ ObjectKey _)*) v:(spreadOperator? _ ObjectFnArgValue?)? _ ","? _  { return [k,v]; })* _ "}" _ { return pair; }
 ObjectFnArgValue "object value" = _ ("="/":") _ v:(function/functionCall/$variable) _ { return v; }
@@ -230,11 +239,12 @@ expression "expression" =
 	loop /
 	import /
   $delete /
-  return
+  return /
+	mathOperator
 
 assignment "assignment" = _ ("const" / "let" / "var")? _ i:assignmentOperands _ "=" _ v:(function/functionCall/expression/$variable) _ ";"? _ {
 	return {
-		type: 'assignment',
+		type: TYPES.ASSIGNMENT,
 		name: i,
 		values: v
 	}
@@ -249,12 +259,12 @@ assignmentVariable "variable assignment" = _ v:((identifier _ "." _)* i:$identif
 
 functionCall "function call" = _ "return"? _ "await"? _ (spreadOperator / notOperator)? _ ((identifier/variable) _ "." _)* name:identifier _ "(" _ args:(!")" functionArgs)? _ ")" _ ("." _ functionCall)* _ ("." _ identifier)? _ ";"? _ {
 	const nested = Array.isArray(args) ? args.filter(arg => arg).flat(Number.POSITIVE_INFINITY) : new Array(args);
-	const nestedTests = nested.filter(item => item?.type === 'test')
+	const nestedTests = nested.filter(item => item?.type === TYPES.TEST)
 	if (nestedTests.length) return nestedTests;
     return {
-    	type: 'function call',
-        name: name,
-        args: nested,
+    	type: TYPES.FUNCTION_CALL,
+			name: name,
+			args: nested,
     }
 }
 
@@ -264,7 +274,7 @@ function "function" =
 
 import "import" = _ "import" _ "{"? _ i:(v:$(identifier/"*") _ ","? { return v; })*  _ "}"? _ "from"? _ string _ ";"? _ {
 	return {
-		type: 'import',
+		type: TYPES.IMPORT,
 		names: i
 	}
 }
@@ -277,7 +287,7 @@ forOfLoop "for of loop" = _ "for" _ "await"? _ "(" _  ("const" / "let" / "var") 
 whileLoop "while loop" = _ "while" _ conditionalContent _
 conditional "conditional" = _ "if" _ i:conditionalContent _ ("else if" _ conditionalContent)? _ ("else" _ conditionalContent)? _ {
 	return {
-    	type: 'ignored',
+    	type: TYPES.IGNORED_CONTENT,
     };
 }
 conditionalContent "conditional content" = _ ("(" _ (!")" notOperator? _ (comparison / variable)) _ (logicalOperator _ (comparison / variable))* _ ")")? _ conditionalBlock _
@@ -312,6 +322,7 @@ string "string" =
 	"`" _ text:$(!([^\\] "`") .)* l:([^\\]) _ "`" { return text+l; } /
   $regex
 
+mathOperator "math operator" = "+" / "-" / "/" / "*" / "^"
 typeOperator "type operator" = "typeof" / "instanceof"
 bitwiseOperator "bitwise operator" = "&" / "|" / "~" / "^" / "<<" / ">>" / ">>>"
 logicalOperator "logical operator" = "&&" / "||" / notOperator
@@ -329,10 +340,10 @@ singleLineComment = _ "//" p:$([^\n]*) _ {return p }
 identifier "identifier" = first:[a-zA-Z_$] next:$([a-zA-Z_$0-9])* accessor:$("[" _ !"]" variable _ "]")* { return first+next; }
 
 ignored_content "ignored content" =
-	p:$comment { return { type: 'ignored', location: location(), content: p}; } /
-	p:$expression { return { type: 'ignored', location: location(), content: p}; } /
-	p:$variable { return { type: 'ignored', location: location(), content: p}; } /
-  p:$function { return { type: 'ignored', location: location(), content: p}; } /
-	p:$([^\n]+) _ { return { type: 'ignored', location: location(), content: p}; }
+	p:$comment { return { type: TYPES.IGNORED_CONTENT, location: location(), content: p}; } /
+	p:$expression { return { type: TYPES.IGNORED_CONTENT, location: location(), content: p}; } /
+	p:$variable { return { type: TYPES.IGNORED_CONTENT, location: location(), content: p}; } /
+  p:$function { return { type: TYPES.IGNORED_CONTENT, location: location(), content: p}; } /
+	p:$([^\n]+) _ { return { type: TYPES.IGNORED_CONTENT, location: location(), content: p}; }
 
 _ = [ \t\r\n]* { return null; }
